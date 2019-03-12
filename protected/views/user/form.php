@@ -88,7 +88,16 @@ $this->pageTitle=Yii::app()->name . ' - User Form';
 				?>
 				</div>
 			</div>
-			
+
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'in_firm',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-10">
+                    <?php echo $form->inlineCheckBoxList($model, 'in_firm',FirmForm::getFirmList(),
+                        array('readonly'=>($model->scenario=='view')));
+                    ?>
+                </div>
+            </div>
+
 			<div class="form-group">
 				<?php echo $form->labelEx($model,'email',array('class'=>"col-sm-2 control-label")); ?>
 				<div class="col-sm-5">
@@ -141,7 +150,8 @@ $this->pageTitle=Yii::app()->name . ' - User Form';
 	$tabs = array();
 	$idx = 0;
 	foreach($model->installedSystem() as $sid=>$sname) {
-		$content = TbHtml::button(Yii::t('user','Apply Template'),array('name'=>'btnTemp_'.$sid,'id'=>'btnTemp_'.$sid,'class'=>'pull-right'));
+		//$content = TbHtml::button(Yii::t('user','Apply Template'),array('name'=>'btnTemp_'.$sid,'id'=>'btnTemp_'.$sid,'class'=>'pull-right'));
+		$content = "";
 		foreach($model->installedSystemGroup($sid) as $gname) {
 			$content .= "<legend>".$model->functionLabels($gname)."</legend>";
 			$cnt = 0;

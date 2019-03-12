@@ -97,7 +97,7 @@ class DocMan {
 		if ($this->docId > 0) {
 			$code = $this->docType;
 			$id = $this->docId;
-			$sql = "select id from docman$suffix.dm_master 
+			$sql = "select id from dm_master 
 						where doc_type_code='$code' and doc_id=$id
 					";
 			$mid = Yii::app()->db->createCommand($sql)->queryScalar();
@@ -107,7 +107,7 @@ class DocMan {
 		
 		if ($mid===false && $genId) {
 			$uid = Yii::app()->user->id;
-			$sql = "insert into docman$suffix.dm_master(doc_type_code, doc_id, lcu) 
+			$sql = "insert into dm_master(doc_type_code, doc_id, lcu) 
 						values (:doc_type_code, :doc_id, :lcu)
 					";
 			try {
@@ -220,13 +220,13 @@ class DocMan {
 	
 	public function getFileMasterId($fileId) {
 		$suffix = Yii::app()->params['envSuffix'];
-		$sql = "select mast_id from docman$suffix.dm_file where id=$fileId and remove<>'Y'";
+		$sql = "select mast_id from dm_file where id=$fileId and remove<>'Y'";
 		return Yii::app()->db->createCommand($sql)->queryScalar();
 	}
 
 	public function getDocId($masterId) {
 		$suffix = Yii::app()->params['envSuffix'];
-		$sql = "select doc_id from docman$suffix.dm_master where id=$masterId";
+		$sql = "select doc_id from dm_master where id=$masterId";
 		return Yii::app()->db->createCommand($sql)->queryScalar();
 	}
 
@@ -249,7 +249,7 @@ class DocMan {
 		$rtn = array();
 		$suffix = Yii::app()->params['envSuffix'];
 		$sql = "select phy_file_name, phy_path_name, display_name, file_type 
-				from docman$suffix.dm_file
+				from dm_file
 				where id = $id
 			";
 		$rows = Yii::app()->db->createCommand($sql)->queryAll();
@@ -269,10 +269,10 @@ class DocMan {
 		$sql = '';
 		switch ($type) {
 			case 'delete':
-				$sql = "update docman$suffix.dm_file set remove = 'Y', luu = :luu where id = :id";
+				$sql = "update dm_file set remove = 'Y', luu = :luu where id = :id";
 				break;
 			default:
-				$sql = "insert into docman$suffix.dm_file
+				$sql = "insert into dm_file
 							(mast_id, phy_file_name, phy_path_name, file_type,
 							display_name, archive, remove, lcu, luu)
 						values 
@@ -329,7 +329,7 @@ class DocMan {
 						a.id, a.doc_type_code, a.doc_id, 
 						b.id as file_id, b.display_name, b.archive, b.lcd, b.file_type  
 					from 
-						docman$suffix.dm_master a inner join docman$suffix.dm_file b on a.id=b.mast_id 
+						dm_master a inner join dm_file b on a.id=b.mast_id 
 					where 
 						a.id=$mastId and b.remove='N'
 					order by b.display_name, b.lcd desc
@@ -338,7 +338,7 @@ class DocMan {
 						a.id, a.doc_type_code, a.doc_id, 
 						b.id as file_id, b.display_name, b.archive, b.lcd, b.file_type  
 					from 
-						docman$suffix.dm_master a inner join docman$suffix.dm_file b on a.id=b.mast_id 
+						dm_master a inner join dm_file b on a.id=b.mast_id 
 					where 
 						a.doc_type_code='$type' and a.doc_id=$id and b.remove='N'
 					order by b.display_name, b.lcd desc
@@ -446,8 +446,7 @@ class DocMan {
 	public function updateDocId(&$connection, $masterId) {
 		$suffix = Yii::app()->params['envSuffix'];
 		$docId = $this->docId;
-		$sql = "update docman$suffix.dm_master set doc_id=$docId where id=$masterId";
-		var_dump($sql);
+		$sql = "update dm_master set doc_id=$docId where id=$masterId";
 		$connection->createCommand($sql)->execute();
 	}
 	

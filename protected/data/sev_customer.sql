@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50620
 File Encoding         : 65001
 
-Date: 2018-12-14 15:12:15
+Date: 2018-12-18 09:58:44
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -51,45 +51,3 @@ CREATE TABLE `sev_customer_info` (
   `lud` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for sev_queue
--- ----------------------------
-DROP TABLE IF EXISTS `sev_queue`;
-CREATE TABLE `sev_queue` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `rpt_desc` varchar(250) NOT NULL,
-  `req_dt` datetime DEFAULT NULL,
-  `fin_dt` datetime DEFAULT NULL,
-  `username` varchar(30) NOT NULL,
-  `status` char(1) NOT NULL,
-  `rpt_type` varchar(10) NOT NULL,
-  `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `rpt_content` longblob,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for sev_queue_param
--- ----------------------------
-DROP TABLE IF EXISTS `sev_queue_param`;
-CREATE TABLE `sev_queue_param` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `queue_id` int(10) unsigned NOT NULL,
-  `param_field` varchar(50) NOT NULL,
-  `param_value` varchar(500) DEFAULT NULL,
-  `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Table structure for sev_queue_user
--- ----------------------------
-DROP TABLE IF EXISTS `sev_queue_user`;
-CREATE TABLE `sev_queue_user` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `queue_id` int(10) unsigned NOT NULL,
-  `username` varchar(30) NOT NULL,
-  `ts` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;

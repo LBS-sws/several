@@ -10,7 +10,7 @@ class LoadExcel {
         include($phpExcelPath . DIRECTORY_SEPARATOR . 'PHPExcel.php');
         $filePath = Yii::app()->basePath."/../".$filePath;
         $this->file_url = $filePath;
-        $PHPExcel = new PHPExcel();
+        //$PHPExcel = new PHPExcel();
         $listHeader = array();
         $listBody = array();
 
@@ -56,6 +56,7 @@ class LoadExcel {
             "listHeader"=>$listHeader,
             "listBody"=>$listBody,
         );
+        unset($PHPReader);
     }
 
     public function getExcelList(){

@@ -36,31 +36,36 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
             <?php echo TbHtml::button('<span class="fa fa-upload"></span> '.Yii::t('misc','Save'), array(
                 'submit'=>Yii::app()->createUrl('customer/save')));
             ?>
-            <?php if ($model->scenario=='edit'): ?>
-                <?php
-                echo TbHtml::button('<span class="fa fa-file-o"></span> '.Yii::t('misc','Add'), array(
-                    'submit'=>Yii::app()->createUrl('customer/new'),
-                ));
-                ?>
-                <?php echo TbHtml::button('<span class="fa fa-remove"></span> '.Yii::t('misc','Delete'), array(
-                        'name'=>'btnDelete','id'=>'btnDelete','data-toggle'=>'modal','data-target'=>'#removedialog',)
-                );
-                ?>
-            <?php endif; ?>
         <?php endif ?>
 	</div>
+            <div class="btn-group pull-right" role="group">
+                <?php
+                    //流程
+                    echo TbHtml::button('<span class="fa fa-file-text-o"></span> '.Yii::t('dialog','Flow'), array(
+                        'name'=>'btnFlow','id'=>'btnFlow','data-toggle'=>'modal','data-target'=>'#flowinfodialog'));
+                 ?>
+                <?php
+                $counter = ($model->no_of_attm['cust'] > 0) ? ' <span id="doccust" class="label label-info">'.$model->no_of_attm['cust'].'</span>' : ' <span id="doccust"></span>';
+                echo TbHtml::button('<span class="fa  fa-file-text-o"></span> '.Yii::t('misc','Attachment').$counter, array(
+                        'name'=>'btnFile','id'=>'btnFile','data-toggle'=>'modal','data-target'=>'#fileuploadcust',)
+                );
+                ?>
+            </div>
 	</div></div>
 
 	<div class="box box-info">
 		<div class="box-body">
 			<?php echo $form->hiddenField($model, 'scenario'); ?>
 			<?php echo $form->hiddenField($model, 'id'); ?>
+			<?php echo $form->hiddenField($model, 'customer_id'); ?>
+			<?php echo $form->hiddenField($model, 'firm_id'); ?>
 
+            <legend><?php echo Yii::t("several","clients info"); ?></legend>
             <div class="form-group">
-                <?php echo $form->labelEx($model,'customer_code',array('class'=>"col-sm-2 control-label")); ?>
+                <?php echo $form->labelEx($model,'client_code',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
-                    <?php echo $form->textField($model, 'customer_code',
-                        array('readonly'=>($model->scenario=='view'))
+                    <?php echo $form->textField($model, 'client_code',
+                        array('readonly'=>(true))
                     ); ?>
                 </div>
             </div>
@@ -68,7 +73,7 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
                 <?php echo $form->labelEx($model,'customer_name',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
                     <?php echo $form->textField($model, 'customer_name',
-                        array('readonly'=>($model->scenario=='view'))
+                        array('readonly'=>(true))
                     ); ?>
                 </div>
             </div>
@@ -76,7 +81,7 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
                 <?php echo $form->labelEx($model,'company_code',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
                     <?php echo $form->textField($model, 'company_code',
-                        array('readonly'=>($model->scenario=='view'))
+                        array('readonly'=>(true))
                     ); ?>
                 </div>
             </div>
@@ -84,48 +89,75 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
                 <?php echo $form->labelEx($model,'customer_year',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
                     <?php echo $form->textField($model, 'customer_year',
-                        array('readonly'=>(true),'rows'=>4)
+                        array('readonly'=>(true))
                     ); ?>
                 </div>
             </div>
             <div class="form-group">
-                <?php echo $form->labelEx($model,'curr',array('class'=>"col-sm-2 control-label")); ?>
+                <?php echo $form->labelEx($model,'remark',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
-                    <?php echo $form->textField($model, 'curr',
-                        array('readonly'=>($model->scenario=='view'))
+                    <?php echo $form->textArea($model, 'remark',
+                        array('readonly'=>($model->scenario=='view'),'rows'=>4)
                     ); ?>
                 </div>
             </div>
-            <div class="form-group">
-                <?php echo $form->labelEx($model,'info_arr',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-8">
-                    <?php echo $model->printInfoBody(); ?>
-                </div>
-            </div>
+            <legend><?php echo Yii::t("several","arrears info"); ?></legend>
+            <?php
+
+            $tabs = array();
+            if(!empty($model->info_arr)){
+                foreach ($model->info_arr as $key=>$item){
+                    $flag = $item["firm_id"]==$model->firm_id;
+                    $tabs[] = array(
+                        'label'=>$item["firm_name"],
+                        'content'=>$model->printInfoBody($item,$form),
+                        'active'=>$flag,
+                    );
+                }
+            }
+
+            $this->widget('bootstrap.widgets.TbTabs', array(
+                'tabs'=>$tabs,
+            ));
+            //echo $model->printInfoBody();
+
+            ?>
 		</div>
 	</div>
 </section>
 
 <?php
-$this->renderPartial('//site/removedialog');
+$this->renderPartial('//site/flowinfo',array('model'=>$model));
+$this->renderPartial('//site/fileupload',array('model'=>$model,
+    'form'=>$form,
+    'doctype'=>'CUST',
+    'header'=>Yii::t('dialog','File Attachment'),
+    'ronly'=>($model->scenario=='view'),
+));
 ?>
+
 <?php
+Script::genFileUpload($model,$form->id,'CUST');
 $addHtml = $model->tBodyTdHtml();
 echo "<xmp id='xmpHidden' class='hidden'>".$addHtml."</xmp>";
 $js = "
 xmpHidden = $('#xmpHidden').text();
 $('#xmpHidden').remove();
-$('#addAmtTr').on('click',function(){
-    var key = $('#amt_body>tr:last').data('key');
+$('.addAmtTr').on('click',function(){
+    var tbody = $(this).parents('tfoot:first').prev('tbody.amt_body');
+    var key = tbody.children('tr:last').data('key');
+    var firm_id = tbody.data('firm');
+    console.log(tbody);
     if(key == undefined){
         key = 0;
     }
     key++;
     //console.log(xmpHidden);
     var html=xmpHidden.replace(/:key/g,key);
-    $('#amt_body').append(html);
+    html=html.replace(/:firm_id/g,firm_id);
+    tbody.append(html);
 });
-$('#amt_body').delegate('.delWage','click',function(){
+$('tbody.amt_body').delegate('.delWage','click',function(){
     $(this).parents('tr:first').remove();
 });
 ";

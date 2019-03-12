@@ -13,19 +13,15 @@
 	<table id="tblFlow" class="table table-hover">
 		<thead>
 			<tr>
-				<th><?php echo Yii::t('dialog','Date');?></th>
-				<th><?php echo Yii::t('dialog','Flow');?></th>
-				<th><?php echo Yii::t('dialog','Resp. User');?></th>
+				<th width="27%"><?php echo Yii::t('dialog','Date');?></th>
+				<th><?php echo Yii::t('several','Remark');?></th>
+				<th width="12%"><?php echo Yii::t('dialog','Resp. User');?></th>
 			</tr>
 		</thead>
 		<tbody>
 <?php
-	$wf = new WorkflowPayment;
-	$connection = $wf->openConnection();
-	$idfield = $model->wfIdField;
-	$dtfield = $model->wfDateField;
-	$wf->startProcess($model->wfCode, $model->$idfield, $model->$dtfield);
-	echo $wf->genTableStateList();
+	$wf = new FunctionForm();
+	echo $wf->startProcess($model->id);
 ?>
 		</tbody>
 	</table>

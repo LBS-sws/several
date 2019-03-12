@@ -12,7 +12,8 @@ class CustomerList extends CListPageModel
 	{
 		return array(	
 			'id'=>Yii::t('several','ID'),
-			'customer_code'=>Yii::t('several','Customer Code'),
+			'firm_name'=>Yii::t('several','in firm'),
+			'client_code'=>Yii::t('several','Customer Code'),
 			'customer_name'=>Yii::t('several','Customer Name'),
 			'customer_year'=>Yii::t('several','Customer Year'),
 			'company_code'=>Yii::t('several','Company Code'),
@@ -31,39 +32,51 @@ class CustomerList extends CListPageModel
 	{
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
-		$sql1 = "select * 
-				from sev_customer
-				where id>0
+		$firm_str = Yii::app()->user->firm();
+		$sql1 = "select a.*,b.customer_year,c.client_code,c.customer_name,d.company_code,e.firm_name
+				from sev_customer_firm a 
+				LEFT JOIN sev_firm e ON a.firm_id = e.id
+				LEFT JOIN sev_customer b ON a.customer_id = b.id
+				LEFT JOIN sev_company c ON c.id = b.company_id
+				LEFT JOIN sev_group d ON d.id = b.group_id
+				where a.firm_id in($firm_str) 
 			";
         $sql2 = "select count(*)
-				from sev_customer
-				where id>0
+				from sev_customer_firm a 
+				LEFT JOIN sev_firm e ON a.firm_id = e.id
+				LEFT JOIN sev_customer b ON a.customer_id = b.id
+				LEFT JOIN sev_company c ON c.id = b.company_id
+				LEFT JOIN sev_group d ON d.id = b.group_id
+				where a.firm_id in($firm_str) 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
 			$svalue = str_replace("'","\'",$this->searchValue);
 			switch ($this->searchField) {
-				case 'customer_code':
-					$clause .= General::getSqlConditionClause('customer_code',$svalue);
+				case 'sev_firm':
+					$clause .= General::getSqlConditionClause('e.firm_name',$svalue);
+					break;
+				case 'client_code':
+					$clause .= General::getSqlConditionClause('c.client_code',$svalue);
 					break;
 				case 'customer_name':
-					$clause .= General::getSqlConditionClause('customer_name',$svalue);
+					$clause .= General::getSqlConditionClause('c.customer_name',$svalue);
 					break;
 				case 'customer_year':
-					$clause .= General::getSqlConditionClause('customer_year',$svalue);
+					$clause .= General::getSqlConditionClause('b.customer_year',$svalue);
 					break;
 				case 'company_code':
-					$clause .= General::getSqlConditionClause('company_code',$svalue);
+					$clause .= General::getSqlConditionClause('d.company_code',$svalue);
 					break;
 				case 'curr':
-					$clause .= General::getSqlConditionClause('curr',$svalue);
+					$clause .= General::getSqlConditionClause('a.curr',$svalue);
 					break;
 			}
 		}
 		if($this->searchArrears == "on arrears"){
-            $clause .= " and amt>0";
+            $clause .= " and a.amt>0";
         }elseif ($this->searchArrears == "off arrears"){
-            $clause .= " and (amt = 0 or amt = '' or amt is null)";
+            $clause .= " and (a.amt = 0 or a.amt = '' or a.amt is null)";
         }
 		
 		$order = "";
@@ -71,7 +84,7 @@ class CustomerList extends CListPageModel
 			$order .= " order by ".$this->orderField." ";
 			if ($this->orderType=='D') $order .= "desc ";
 		}else{
-            $order .= " order by lcd desc ";
+            $order .= " order by a.id desc ";
         }
 
 		$sql = $sql2.$clause;
@@ -87,7 +100,9 @@ class CustomerList extends CListPageModel
 			    $color = floatval($record['amt'])>0?"text-danger":"text-primary";
 				$this->attr[] = array(
 					'id'=>$record['id'],
-					'customer_code'=>$record['customer_code'],
+					'customer_id'=>$record['customer_id'],
+					'firm_name'=>$record['firm_name'],
+					'client_code'=>$record['client_code'],
 					'customer_name'=>$record['customer_name'],
 					'customer_year'=>$record['customer_year'],
 					'company_code'=>$record['company_code'],

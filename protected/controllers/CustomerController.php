@@ -28,15 +28,15 @@ class CustomerController extends Controller
     {
         return array(
             array('allow',
-                'actions'=>array('import','importSave'),
+                'actions'=>array('import','importSave','test'),
                 'expression'=>array('CustomerController','allowImport'),
             ),
             array('allow',
-                'actions'=>array('edit','new','save','delete'),
+                'actions'=>array('edit','save','delete','fileupload','fileRemove'),
                 'expression'=>array('CustomerController','allowReadWrite'),
             ),
             array('allow',
-                'actions'=>array('index','view'),
+                'actions'=>array('index','view','fileDownload'),
                 'expression'=>array('CustomerController','allowReadOnly'),
             ),
             array('deny',  // deny all users
@@ -64,6 +64,13 @@ class CustomerController extends Controller
     }
     public function actionImportSave(){
         $model = new UploadExcelForm();
+        $model->attributes = $_POST['UploadExcelForm'];
+        if (!$model->validate()) {
+            $message = CHtml::errorSummary($model);
+            Dialog::message(Yii::t('dialog','Validation Message'), $message);
+            $this->render('import',array('model'=>$model,));
+            return false;
+        }
         $img = CUploadedFile::getInstance($model,'file');
         $city = Yii::app()->user->city();
         $path =Yii::app()->basePath."/../upload/";
@@ -88,12 +95,19 @@ class CustomerController extends Controller
             $img->saveAs($url);
             $loadExcel = new LoadExcel($url);
             $list = $loadExcel->getExcelList();
+            //$loadExcel->clear();
             $model->loadSeveral($list);
-            $this->redirect(Yii::app()->createUrl('customer/import'));
+            if(empty($model->error_list)){
+                Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
+                $this->redirect(Yii::app()->createUrl('customer/import'));
+            }else{
+                $model->exportExcel();
+            }
         }else{
             $message = CHtml::errorSummary($model);
             Dialog::message(Yii::t('dialog','Validation Message'), $message);
-            $this->redirect(Yii::app()->createUrl('customer/import'));
+            $this->render('form',array('model'=>$model));
+            //$this->redirect(Yii::app()->createUrl('customer/import'));
         }
     }
 
@@ -172,4 +186,55 @@ class CustomerController extends Controller
         $this->redirect(Yii::app()->createUrl('customer/index'));
     }
 
+
+    public function actionFileupload($doctype) {
+        $model = new CustomerForm();
+        if (isset($_POST['CustomerForm'])) {
+            $model->attributes = $_POST['CustomerForm'];
+
+            $id = ($_POST['CustomerForm']['scenario']=='new') ? 0 : $model->id;
+            $docman = new DocMan($model->docType,$id,get_class($model));
+            $docman->masterId = $model->docMasterId[strtolower($doctype)];
+            if (isset($_FILES[$docman->inputName])) $docman->files = $_FILES[$docman->inputName];
+            $docman->fileUpload();
+            echo $docman->genTableFileList(false);
+        } else {
+            echo "NIL";
+        }
+    }
+
+    public function actionFileRemove($doctype) {
+        $model = new CustomerForm();
+        if (isset($_POST['CustomerForm'])) {
+            $model->attributes = $_POST['CustomerForm'];
+
+            $docman = new DocMan($model->docType,$model->id,'CustomerForm');
+            $docman->masterId = $model->docMasterId[strtolower($doctype)];
+            $docman->fileRemove($model->removeFileId[strtolower($doctype)]);
+            echo $docman->genTableFileList(false);
+        } else {
+            echo "NIL";
+        }
+    }
+
+    public function actionFileDownload($mastId, $docId, $fileId, $doctype) {
+        $sql = "select firm_id from sev_customer_firm where id = $docId";
+        $row = Yii::app()->db->createCommand($sql)->queryRow();
+        if ($row) {
+            $firm_list = Yii::app()->user->firm_list();
+            if (in_array($row['firm_id'],$firm_list)) {
+                $docman = new DocMan($doctype,$docId,'CustomerForm');
+                $docman->masterId = $mastId;
+                $docman->fileDownload($fileId);
+            } else {
+                throw new CHttpException(404,'Access right not match.');
+            }
+        } else {
+            throw new CHttpException(404,'Record not found.');
+        }
+    }
+
+    public function actionTest(){
+        Yii::app()->end();
+    }
 }

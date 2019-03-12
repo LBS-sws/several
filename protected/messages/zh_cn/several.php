@@ -2,6 +2,7 @@
 return array(
     'the name of already exists'=>'名称已经存在',
     ' can not repeat'=>'不能重复',
+    ' does not exist'=>'不存在',
     'Data exception, please refresh retry.'=>'数据异常，请刷新重试',
     ' can not empty'=>'不能为空',
 
@@ -22,7 +23,7 @@ return array(
     'Customer Code'=>'客户编号',
     'Customer Name'=>'客户名字',
     'Customer Year'=>'年',
-    'Company Code'=>'公司编号',
+    'Firm Code'=>'公司编号',
     'Curr'=>'货币',
     'Amt'=>'剩余数额',
     'Info Arr'=>'追数详情',
@@ -33,5 +34,38 @@ return array(
     'all'=>'全部',
     'on arrears'=>'有欠款',
     'off arrears'=>'无欠款',
+
+    'Group Form'=>'集团编号表单',
+    'Company Code'=>'集团编号',
+    'company Code'=>'集团编号',
+    'assign staff'=>'指派员工',
+    'occurrences'=>'欠款次数',
+    'assign date'=>'指派日期',
+    'salesman one'=>'销售员',
+    'cross'=>'跨区',
+    'sysgen'=>'系统生成',
+    'Import File'=>'文件导入',
+    'file'=>'文件',
+    'staff Form'=>'员工表单',
+    'staff name'=>'员工名字',
+    'staff type'=>'员工类型',
+    'technician'=>'技术员',
+    'salesman'=>'销售员',
+
+    'Company Form'=>'客戶公司表单',
+    'Firm Form'=>'公司表单',
+    'company name'=>'客戶公司名称',
+    'firm name'=>'公司名称',
+    'index'=>'层级',
+
+    'After Clients Form'=>'追数客户表单',
+    'After Clients List'=>'追数客户列表',
+    'Clients to firm'=>'可追数公司',
+    'Clients firm'=>'追数公司',
+    'in firm'=>'管辖公司',
+    'clients info'=>'客户信息',
+    'arrears info'=>'追数信息',
+
+    'overwrite files'=>'是否覆盖',
 );
 ?>

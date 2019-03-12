@@ -72,6 +72,14 @@ return array(
     'Customer From'=>'客戶表单',
     'customer'=>'客戶',
     'import several'=>'导入会计追数',
+
+    'Group number'=>'集团编号',
+    'Staff List'=>'员工列表',
+    'Firm List'=>'公司列表',
+    'client company'=>'客户公司',
+    'accounting modules'=>'会计模块',
+    'manager module'=>'经理模块',
+    'New After Clients'=>'新建追数客户',
     //沈超添加结束
 );
 ?>
