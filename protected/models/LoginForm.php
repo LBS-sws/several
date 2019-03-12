@@ -84,4 +84,8 @@ class LoginForm extends CFormModel
 			return false;
 		}
 	}
+
+	public function getIdentity(){
+	    return $this->_identity;
+    }
 }

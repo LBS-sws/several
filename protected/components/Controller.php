@@ -25,7 +25,7 @@ class Controller extends CController
 	
 	public function init()
 	{
-		parent::init();
+        parent::init();
 		$session = Yii::app()->session;
 		if (isset($session['lang']))
 			Yii::app()->language = $session['lang'];

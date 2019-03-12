@@ -16,7 +16,7 @@ class City extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'security'.Yii::app()->params['envSuffix'].'.sec_city';
+		return 'sec_city';
 	}
 	
 	public function getAncestor($code) {

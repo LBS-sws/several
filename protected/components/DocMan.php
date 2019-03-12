@@ -455,6 +455,7 @@ class DocMan {
 		$firstDir = $hashcode & 255;
 		$tmp = sprintf("%x",$firstDir);
 		$path = $this->baseDir.'/'.$tmp;
+		//var_dump($path);die();
 		if (!file_exists($path)) mkdir($path);
 		$secondDir = ($hashcode >> 8) & 255;
 		$tmp = sprintf("%x",$secondDir);

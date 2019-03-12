@@ -51,9 +51,9 @@ class SiteController extends Controller
 	{
 		// renders the view file 'protected/views/site/index.php'
 		// using the default layout 'protected/views/layouts/main.php'
-		if (Yii::app()->user->isGuest)
-			$this->actionLogin();
-		else {
+		if (Yii::app()->user->isGuest){
+            $this->actionLogin();
+        }else {
 			$uname = Yii::app()->user->name; 
 			Yii::app()->session['system'] = Yii::app()->params['systemId'];
 			Yii::app()->user->saveUserOption($uname, 'system', Yii::app()->params['systemId']);

@@ -23,6 +23,6 @@ class LoginLog extends CActiveRecord
 	 */
 	public function tableName()
 	{
-		return 'security'.Yii::app()->params['envSuffix'].'.sec_login_log';
+		return 'sec_login_log';
 	}
 }

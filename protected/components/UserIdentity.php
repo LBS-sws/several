@@ -34,6 +34,10 @@ class UserIdentity extends CUserIdentity
 		else {
 			$this->username=$user->username;
 			$this->displayname=$user->disp_name;
+
+            $this->setState('username', $user->username);
+            $this->setState('displayname', $this->displayname);
+
 			$this->errorCode=self::ERROR_NONE;
 		}
 		return ($this->errorCode===self::ERROR_NONE);

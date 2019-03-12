@@ -19,7 +19,7 @@ class User extends CActiveRecord
 	public function tableName()
 	{
 		
-		return 'security'.Yii::app()->params['envSuffix'].'.sec_user';
+		return 'sec_user';
 	}
 
 	/**
@@ -101,7 +101,7 @@ class User extends CActiveRecord
 				'control'=>array(),
 			);
 		$sql = "select system_id, a_read_only, a_read_write, a_control 
-				from security$suffix.sec_user_access 
+				from sec_user_access 
 				where username='$username'
 			";
 		$rows = Yii::app()->db->createCommand($sql)->queryAll();
@@ -120,7 +120,7 @@ class User extends CActiveRecord
 
 		$rtn = array();
 		$username = $this->username;
-		$sql = "select * from security$suffix.sec_user_option where Lower(username)='$username'";
+		$sql = "select * from sec_user_option where Lower(username)='$username'";
 		$rows = Yii::app()->db->createCommand($sql)->queryAll();
 		if (count($rows) > 0) {
 			foreach ($rows as $row) {
@@ -134,7 +134,7 @@ class User extends CActiveRecord
 		$suffix = Yii::app()->params['envSuffix'];
 
 		$connection = Yii::app()->db;
-		$sql = "replace into security$suffix.sec_user_option 
+		$sql = "replace into sec_user_option 
 					(username, option_key, option_value)
 				values
 					(:username, :option_key, :option_value)
@@ -151,7 +151,7 @@ class User extends CActiveRecord
 
 		$rtn = '';
 		$username = $this->username;
-		$sql = "select field_blob from security$suffix.sec_user_info where Lower(username)='$username' and field_id='$fieldId'";
+		$sql = "select field_blob from sec_user_info where Lower(username)='$username' and field_id='$fieldId'";
 		$row = Yii::app()->db->createCommand($sql)->queryRow();
 		if ($row!==false) $rtn = base64_decode($row['field_blob']);
 		return $rtn;
@@ -162,7 +162,7 @@ class User extends CActiveRecord
 
 		$rtn = '';
 		$username = $this->username;
-		$sql = "select field_value from security$suffix.sec_user_info where Lower(username)='$username' and field_id='$fieldId'";
+		$sql = "select field_value from sec_user_info where Lower(username)='$username' and field_id='$fieldId'";
 		$row = Yii::app()->db->createCommand($sql)->queryRow();
 		if ($row!==false) $rtn = $row['field_value'];
 		return $rtn;
