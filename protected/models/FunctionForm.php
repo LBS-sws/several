@@ -63,4 +63,14 @@ class FunctionForm extends CFormModel
         }
         return $html;
     }
+
+    //獲取語言列表
+    public function getAllLang(){
+        return array(
+            ""=>"",
+            "zh_cn"=>Yii::t("several","zh_cn"),
+            "zh_tw"=>Yii::t("several","zh_tw"),
+            "en_us"=>Yii::t("several","en_us")
+        );
+    }
 }

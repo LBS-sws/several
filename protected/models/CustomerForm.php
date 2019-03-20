@@ -19,6 +19,18 @@ class CustomerForm extends CFormModel
 	public $curr;
 	public $amt;
 	public $lcd;
+
+	public $acca_username;
+	public $acca_phone;
+	public $acca_remark;
+	public $acca_fun;
+	public $acca_lang;
+	public $acca_discount;
+	public $salesman_id;
+	public $staff_id;
+	public $lud;
+
+
 	public $info_arr=array();
 	protected $validateMonth;
 	public $remark;
@@ -51,9 +63,21 @@ class CustomerForm extends CFormModel
             'customer_name'=>Yii::t('several','Customer Name'),
             'customer_year'=>Yii::t('several','Customer Year'),
             'company_code'=>Yii::t('several','Company Code'),
+
+            'acca_username'=>Yii::t('several','accountant username'),
+            'acca_phone'=>Yii::t('several','accountant phone'),
+            'acca_lang'=>Yii::t('several','accountant lang'),
+            'acca_discount'=>Yii::t('several','discount'),
+            'acca_remark'=>Yii::t('several','accountant remark'),
+            'acca_fun'=>Yii::t('several','method'),
+            'salesman_id'=>Yii::t('several','salesman'),
+            'staff_id'=>Yii::t('several','assign staff'),
+            'phone'=>Yii::t('several','phone'),
+            'lud'=>Yii::t('several','last time'),
+
             'curr'=>Yii::t('several','Curr'),
             'amt'=>Yii::t('several','Amt'),
-            'remark'=>Yii::t('several','Remark'),
+            'remark'=>Yii::t('several','Update Remark'),
             'info_arr'=>Yii::t('several','Info Arr'),
         );
 	}
@@ -65,7 +89,8 @@ class CustomerForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, info_arr','safe'),
+            array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, info_arr
+            ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,lud','safe'),
 			array('remark','required'),
 			array('info_arr','validateInfoArr'),
             array('files, removeFileId, docMasterId, no_of_attm','safe'),
@@ -209,7 +234,7 @@ class CustomerForm extends CFormModel
 	public function retrieveData($index)
 	{
         $firm_str = Yii::app()->user->firm();
-        $rows = Yii::app()->db->createCommand()->select("a.*,a.firm_id,d.customer_year,b.client_code,b.customer_name,c.company_code,countdoc('CUST',a.id) as custdoc")->from("sev_customer_firm a")
+        $rows = Yii::app()->db->createCommand()->select("a.id as s_id,a.customer_id,a.firm_id,a.curr,a.amt,d.*,b.client_code,b.customer_name,c.company_code,countdoc('CUST',a.id) as custdoc")->from("sev_customer_firm a")
             ->leftJoin("sev_customer d","a.customer_id=d.id")
             ->leftJoin("sev_company b","d.company_id=b.id")
             ->leftJoin("sev_group c","d.group_id=c.id")
@@ -218,13 +243,24 @@ class CustomerForm extends CFormModel
 		{
 			foreach ($rows as $row)
 			{
-				$this->id = $row['id'];
+				$this->id = $row['s_id'];
 				$this->customer_id = $row['customer_id'];
 				$this->firm_id = $row['firm_id'];
 				$this->client_code = $row['client_code'];
                 $this->customer_name = $row['customer_name'];
                 $this->customer_year = $row['customer_year'];
                 $this->company_code = $row['company_code'];
+
+                $this->staff_id = $row['staff_id'];
+                $this->salesman_id = $row['salesman_id'];
+                $this->acca_username = $row['acca_username'];
+                $this->acca_phone = $row['acca_phone'];
+                $this->acca_remark = $row['acca_remark'];
+                $this->acca_fun = $row['acca_fun'];
+                $this->acca_lang = $row['acca_lang'];
+                $this->acca_discount = $row['acca_discount'];
+                $this->lud = $row['lud'];
+
                 $this->no_of_attm['cust'] = $row['custdoc'];
 /*                $this->curr = $row['curr'];
                 $this->amt = $row['amt'];
@@ -262,6 +298,14 @@ class CustomerForm extends CFormModel
         $firm_list = Yii::app()->user->firm_list();
         $list = $this->info_arr;
         $lcu = Yii::app()->user->id;
+        Yii::app()->db->createCommand()->update('sev_customer', array(
+            'acca_username'=>$this->acca_username,
+            'acca_phone'=>$this->acca_phone,
+            'acca_remark'=>$this->acca_remark,
+            'acca_fun'=>$this->acca_fun,
+            'acca_lang'=>$this->acca_lang,
+            'acca_discount'=>$this->acca_discount
+        ), 'id=:id', array(':id'=>$this->customer_id));
         foreach ($list as $key => $value){
             if(!in_array($key,$firm_list)){
                 return false;

@@ -77,6 +77,14 @@ $this->pageTitle=Yii::app()->name . ' - staff Form';
                     <p class="form-control-static text-warning">員工類型暫時沒有用處，可以隨意填寫</p>
                 </div>
             </div>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'staff_phone',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'staff_phone',
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+            </div>
 		</div>
 	</div>
 </section>

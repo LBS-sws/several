@@ -40,6 +40,7 @@ $this->pageTitle=Yii::app()->name . ' - Staff';
     <?php
     $search = array(
         'staff_name',
+        'staff_phone',
     );
 /*    $search_add_html="";
     $modelName = get_class($model);

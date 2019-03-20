@@ -15,4 +15,9 @@
         ;
         ?>
     </th>
+    <th>
+        <?php echo TbHtml::link($this->getLabelName('staff_phone').$this->drawOrderArrow('staff_phone'),'#',$this->createOrderLink('staff-list','staff_phone'))
+        ;
+        ?>
+    </th>
 </tr>

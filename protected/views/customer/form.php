@@ -59,6 +59,8 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
 			<?php echo $form->hiddenField($model, 'id'); ?>
 			<?php echo $form->hiddenField($model, 'customer_id'); ?>
 			<?php echo $form->hiddenField($model, 'firm_id'); ?>
+			<?php echo $form->hiddenField($model, 'salesman_id'); ?>
+			<?php echo $form->hiddenField($model, 'staff_id'); ?>
 
             <legend><?php echo Yii::t("several","clients info"); ?></legend>
             <div class="form-group">
@@ -86,10 +88,81 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
                 </div>
             </div>
             <div class="form-group">
+                <?php echo $form->labelEx($model,'salesman_id',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo TbHtml::textField("salesman_id",StaffForm::getStaffNameToId($model->salesman_id),array('readonly'=>(true))) ?>
+                </div>
+                <?php echo $form->labelEx($model,'phone',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo TbHtml::textField("phone",StaffForm::getStaffPhoneToId($model->staff_id),array('readonly'=>(true))) ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'staff_id',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo TbHtml::textField("staff_id",StaffForm::getStaffNameToId($model->staff_id),array('readonly'=>(true))) ?>
+                </div>
+                <?php echo $form->labelEx($model,'phone',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo TbHtml::textField("phone",StaffForm::getStaffPhoneToId($model->staff_id),array('readonly'=>(true))) ?>
+                </div>
+            </div>
+            <div class="form-group">
                 <?php echo $form->labelEx($model,'customer_year',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-5">
+                <div class="col-sm-3">
                     <?php echo $form->textField($model, 'customer_year',
                         array('readonly'=>(true))
+                    ); ?>
+                </div>
+                <?php echo $form->labelEx($model,'lud',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'lud',
+                        array('readonly'=>(true))
+                    ); ?>
+                </div>
+            </div>
+            <legend>&nbsp;</legend>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'acca_username',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'acca_username',
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+                <?php echo $form->labelEx($model,'acca_phone',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'acca_phone',
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'acca_lang',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->dropDownList($model, 'acca_lang',FunctionForm::getAllLang(),
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+                <?php echo $form->labelEx($model,'acca_discount',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'acca_discount',
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'acca_remark',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-5">
+                    <?php echo $form->textArea($model, 'acca_remark',
+                        array('readonly'=>($model->scenario=='view'),'rows'=>4)
+                    ); ?>
+                </div>
+            </div>
+            <div class="form-group">
+                <?php echo $form->labelEx($model,'acca_fun',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-5">
+                    <?php echo $form->textField($model, 'acca_fun',
+                        array('readonly'=>($model->scenario=='view'))
                     ); ?>
                 </div>
             </div>

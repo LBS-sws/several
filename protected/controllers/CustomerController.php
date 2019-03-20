@@ -46,7 +46,7 @@ class CustomerController extends Controller
     }
 
     public static function allowImport() {
-        return Yii::app()->user->validRWFunction('CU01');
+        return Yii::app()->user->validRWFunction('MR01');
     }
 
     public static function allowReadWrite() {

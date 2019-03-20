@@ -9,4 +9,5 @@
     <td><?php echo $this->record['id']; ?></td>
     <td><?php echo $this->record['staff_name']; ?></td>
     <td><?php echo $this->record['staff_type']; ?></td>
+    <td><?php echo $this->record['staff_phone']; ?></td>
 </tr>

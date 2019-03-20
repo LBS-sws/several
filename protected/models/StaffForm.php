@@ -11,6 +11,7 @@ class StaffForm extends CFormModel
 	public $id = 0;
 	public $staff_name;
 	public $staff_type;
+	public $staff_phone;
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -22,6 +23,7 @@ class StaffForm extends CFormModel
             'id'=>Yii::t('several','ID'),
             'staff_name'=>Yii::t('several','staff name'),
             'staff_type'=>Yii::t('several','staff type'),
+            'staff_phone'=>Yii::t('several','staff phone'),
         );
 	}
 
@@ -32,7 +34,7 @@ class StaffForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, staff_name, staff_type','safe'),
+            array('id, staff_name, staff_type, staff_phone','safe'),
 			array('staff_name','required'),
 			array('staff_type','required'),
 			//array('cross','required'),
@@ -69,6 +71,24 @@ class StaffForm extends CFormModel
         return $arr;
     }
 
+    public function getStaffNameToId($id){
+        $row = Yii::app()->db->createCommand()->select("staff_name")->from("sev_staff")
+            ->where('id=:id', array(':id'=>$id))->queryRow();
+        if($row){
+            return $row["staff_name"];
+        }
+        return $id;
+    }
+
+    public function getStaffPhoneToId($id){
+        $row = Yii::app()->db->createCommand()->select("staff_phone")->from("sev_staff")
+            ->where('id=:id', array(':id'=>$id))->queryRow();
+        if($row){
+            return $row["staff_phone"];
+        }
+        return $id;
+    }
+
     //刪除验证
 	public function validateDelete(){
         $rows = Yii::app()->db->createCommand()->select()->from("sev_customer")
@@ -98,6 +118,7 @@ class StaffForm extends CFormModel
 				$this->id = $row['id'];
 				$this->staff_name = $row['staff_name'];
                 $this->staff_type = $row['staff_type'];
+                $this->staff_phone = $row['staff_phone'];
 				break;
 			}
 		}
@@ -131,15 +152,16 @@ class StaffForm extends CFormModel
 				break;
 			case 'new':
 				$sql = "insert into sev_staff(
-							staff_name, staff_type, lcu,lcd
+							staff_name, staff_type, staff_phone, lcu,lcd
 						) values (
-							:staff_name, :staff_type, :lcu,:lcd
+							:staff_name, :staff_type, :staff_phone, :lcu,:lcd
 						)";
 				break;
 			case 'edit':
 				$sql = "update sev_staff set
 							staff_name = :staff_name, 
 							staff_type = :staff_type, 
+							staff_phone = :staff_phone, 
 							luu = :luu
 						where id = :id
 						";
@@ -153,6 +175,8 @@ class StaffForm extends CFormModel
 			$command->bindParam(':staff_name',$this->staff_name,PDO::PARAM_STR);
 		if (strpos($sql,':staff_type')!==false)
 			$command->bindParam(':staff_type',$this->staff_type,PDO::PARAM_STR);
+		if (strpos($sql,':staff_phone')!==false)
+			$command->bindParam(':staff_phone',$this->staff_phone,PDO::PARAM_STR);
 
 		if (strpos($sql,':luu')!==false)
 			$command->bindParam(':luu',$uid,PDO::PARAM_STR);

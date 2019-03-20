@@ -67,5 +67,19 @@ return array(
     'arrears info'=>'追数信息',
 
     'overwrite files'=>'是否覆盖',
+
+    'Update Remark'=>'修改说明',
+    'phone'=>'电话号码',
+    'staff phone'=>'员工电话',
+    'accountant username'=>'联络人姓名',
+    'accountant phone'=>'联络人电话',
+    'accountant lang'=>'联络人语言',
+    'accountant remark'=>'联络人描述',
+    'method'=>'找数方法',
+    'discount'=>'优惠折扣',
+    'zh_cn'=>'中文简体',
+    'zh_tw'=>'中文繁体',
+    'en_us'=>'英文',
+    'last time'=>'最后修改时间',
 );
 ?>

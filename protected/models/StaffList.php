@@ -14,6 +14,7 @@ class StaffList extends CListPageModel
 			'id'=>Yii::t('several','ID'),
 			'staff_name'=>Yii::t('several','staff name'),
 			'staff_type'=>Yii::t('several','staff type'),
+			'staff_phone'=>Yii::t('several','staff phone'),
 		);
 	}
     public function rules()
@@ -41,6 +42,9 @@ class StaffList extends CListPageModel
 			switch ($this->searchField) {
 				case 'staff_name':
 					$clause .= General::getSqlConditionClause('staff_name',$svalue);
+					break;
+				case 'staff_phone':
+					$clause .= General::getSqlConditionClause('staff_phone',$svalue);
 					break;
 			}
 		}
@@ -71,6 +75,7 @@ class StaffList extends CListPageModel
 			foreach ($records as $k=>$record) {
 				$this->attr[] = array(
 					'id'=>$record['id'],
+					'staff_phone'=>$record['staff_phone'],
 					'staff_name'=>$record['staff_name'],
 					'staff_type'=>$this->getStaffTypeToNumber($record['staff_type'])
 				);
