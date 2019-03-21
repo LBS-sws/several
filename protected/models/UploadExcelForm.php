@@ -127,6 +127,7 @@ class UploadExcelForm extends CFormModel
 
             if($continue){ //導入數據
                 $insetId = $this->insertCustormer();
+                FunctionForm::refreshGroupOne($this->onlyArr["group_id"]);//刷新集團編號的次數及銷售員
                 if(!empty($this->onlyArrInfo)){
                     foreach ($this->onlyArrInfo as $item){
                         $item["firm_cus_id"]=$insetId;
@@ -160,11 +161,11 @@ class UploadExcelForm extends CFormModel
         $onlyArr = $this->onlyArr;
         $row = Yii::app()->db->createCommand()->select("id,firm_name_id")->from("sev_customer")
             ->where('company_id=:company_id AND customer_year=:customer_year',array(':company_id'=>$onlyArr["company_id"],':customer_year'=>$this->year))->queryRow();
-        if($row){
+        if($row){//如果已存在客戶關係
             $this->customer_id = $row["id"];
             $arr = Yii::app()->db->createCommand()->select("id")->from("sev_customer_firm")
                 ->where('customer_id=:customer_id AND firm_id=:firm_id',array(':customer_id'=>$row["id"],':firm_id'=>$this->firm_id))->queryRow();
-            if($arr){
+            if($arr){//如果已存在客戶追數信息
                 Yii::app()->db->createCommand()->delete("sev_customer_info","firm_cus_id=:id",array(":id"=>$arr["id"]));
                 Yii::app()->db->createCommand()->update("sev_customer_firm", array(
                     "amt"=>$this->amtSum,

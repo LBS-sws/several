@@ -39,7 +39,7 @@ return array(
     'Company Code'=>'集团编号',
     'company Code'=>'集团编号',
     'assign staff'=>'指派员工',
-    'occurrences'=>'欠款次数',
+    'occurrences'=>'追数次数',
     'assign date'=>'指派日期',
     'salesman one'=>'销售员',
     'cross'=>'跨区',

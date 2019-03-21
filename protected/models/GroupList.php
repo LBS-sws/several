@@ -17,6 +17,7 @@ class GroupList extends CListPageModel
 			'assign_date'=>Yii::t('several','assign date'),
 			'salesman_one_ts'=>Yii::t('several','salesman one'),
 			'cross_district'=>Yii::t('several','cross'),
+            'occurrences'=>Yii::t('several','occurrences'),
 			//'salesman_two_ts'=>Yii::t('several','salesman two'),
 		);
 	}

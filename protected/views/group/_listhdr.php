@@ -20,6 +20,11 @@
 			;
 		?>
 	</th>
+	<th>
+		<?php echo TbHtml::link($this->getLabelName('occurrences').$this->drawOrderArrow('a.occurrences'),'#',$this->createOrderLink('group-list','a.occurrences'))
+			;
+		?>
+	</th>
     <th>
         <?php echo TbHtml::link($this->getLabelName('salesman_one_ts').$this->drawOrderArrow('a.salesman_one_ts'),'#',$this->createOrderLink('group-list','a.salesman_one_ts'))
         ;

@@ -10,5 +10,6 @@
     <td><?php echo $this->record['staff_name']; ?></td>
     <td><?php echo $this->record['assign_date']; ?></td>
     <td><?php echo $this->record['cross_district']; ?></td>
+    <td><?php echo $this->record['occurrences']; ?></td>
     <td><?php echo $this->record['salesman_one_ts']; ?></td>
 </tr>
