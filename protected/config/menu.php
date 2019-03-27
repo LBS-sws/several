@@ -54,4 +54,29 @@ return array(
             ),
         ),
     ),
+    'Search'=>array(//查詢
+        'access'=>'BC',
+        'items'=>array(
+            'Search Group'=>array( //集團查詢
+                'access'=>'BC01',
+                'url'=>'/searchGroup/index',
+            ),
+            'Search Company'=>array(//客户公司查詢
+                'access'=>'BC02',
+                'url'=>'/searchCompany/index',
+            ),
+            'Search Firm'=>array(//LBS公司查詢
+                'access'=>'BC03',
+                'url'=>'/searchFirm/index',
+            ),
+            'Search Staff'=>array(//指派員工查詢
+                'access'=>'BC04',
+                'url'=>'/searchStaff/index',
+            ),
+            'Search Customer'=>array(//查询追数详情
+                'access'=>'BC05',
+                'url'=>'/searchCustomer/index',
+            ),
+        ),
+    ),
 );

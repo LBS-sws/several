@@ -81,5 +81,17 @@ return array(
     'zh_tw'=>'中文繁體',
     'en_us'=>'英文',
     'last time'=>'最後修改時間',
+    'export'=>'導出',
+    'occurrences number'=>'出現次數',
+    'arrears number'=>'欠款次數',
+    'arrears money'=>'欠款總額',
+    'group list'=>'集團列表',
+    'Balance details'=>'欠款詳情',
+    'Balance summary'=>'欠款匯總',
+
+    'For collection'=>'代收款總額',
+    'collection number'=>'代收款次數',
+    'Firm List'=>'LBS公司列表',
+    'Staff List'=>'員工列表',
 );
 ?>

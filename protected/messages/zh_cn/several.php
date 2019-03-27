@@ -55,7 +55,7 @@ return array(
     'Company Form'=>'客戶公司表单',
     'Firm Form'=>'公司表单',
     'company name'=>'客戶公司名称',
-    'firm name'=>'公司名称',
+    'firm name'=>'LBS公司名称',
     'index'=>'层级',
 
     'After Clients Form'=>'追数客户表单',
@@ -81,5 +81,19 @@ return array(
     'zh_tw'=>'中文繁体',
     'en_us'=>'英文',
     'last time'=>'最后修改时间',
+
+    'export'=>'导出',
+    'occurrences number'=>'出现次数',
+    'arrears number'=>'欠款次数',
+    'arrears money'=>'欠款总额',
+    'group list'=>'集团列表',
+    'Balance details'=>'欠款详情',
+    'Balance summary'=>'欠款汇总',
+
+    'For collection'=>'待收款总额',
+    'collection number'=>'待收款次数',
+    'Firm List'=>'LBS公司列表',
+    'Staff List'=>'员工列表',
+
 );
 ?>

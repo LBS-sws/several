@@ -76,6 +76,20 @@ return array(
     'Customer From'=>'客戶表單',
     'client'=>'客戶',
     'import several'=>'導入會計追數',
+
+    'Group number'=>'集團編號',
+    'Staff List'=>'員工列表',
+    'Firm List'=>'LBS公司列表',
+    'client company'=>'客戶公司',
+    'accounting modules'=>'會計模塊',
+    'manager module'=>'經理模塊',
+    'New After Clients'=>'新建追數客戶',
+    'Search'=>'查詢',
+    'Search Group'=>'集團查詢',
+    'Search Company'=>'客户公司查詢',
+    'Search Firm'=>'LBS公司查詢',
+    'Search Staff'=>'指派員工查詢',
+    'Search Customer'=>'查詢追數詳情',
     //沈超添加结束
 );
 ?>

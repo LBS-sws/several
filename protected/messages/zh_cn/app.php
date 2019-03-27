@@ -75,11 +75,17 @@ return array(
 
     'Group number'=>'集团编号',
     'Staff List'=>'员工列表',
-    'Firm List'=>'公司列表',
+    'Firm List'=>'LBS公司列表',
     'client company'=>'客户公司',
     'accounting modules'=>'会计模块',
     'manager module'=>'经理模块',
     'New After Clients'=>'新建追数客户',
+    'Search'=>'查询',
+    'Search Group'=>'集团查询',
+    'Search Company'=>'客户公司查询',
+    'Search Firm'=>'LBS公司查询',
+    'Search Staff'=>'负责员工查询',
+    'Search Customer'=>'查询追数详情',
     //沈超添加结束
 );
 ?>

@@ -68,6 +68,14 @@ class FirmForm extends CFormModel
         return $arr;
     }
 
+    public function getFirmNameToId($firm_id){
+        $row = Yii::app()->db->createCommand()->select("firm_name")->from("sev_firm")->where("id=:id",array(":id"=>$firm_id))->queryRow();
+        if($row){
+            return $row["firm_name"];
+        }
+        return $firm_id;
+    }
+
     //刪除验证
 	public function validateDelete(){
         $rows = Yii::app()->db->createCommand()->select()->from("sev_customer_firm")
