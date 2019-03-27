@@ -34,6 +34,8 @@ $this->pageTitle=Yii::app()->name . ' - SearchCustomer';
     );
     $search_add_html="";
     $modelName = get_class($model);
+    $search_add_html .= TbHtml::dropDownList($modelName.'[searchYear]',$model->searchYear,UploadExcelForm::getYear(),
+        array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
     $search_add_html .= TbHtml::dropDownList($modelName.'[searchArrears]',$model->searchArrears,$model->getArrearsList(),
         array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
 

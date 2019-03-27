@@ -235,6 +235,9 @@ class CustomerController extends Controller
     }
 
     public function actionTest(){
+        $model = new FunctionForm();
+        $model->refreshGroupAll();
+        var_dump("end");
         Yii::app()->end();
     }
 }

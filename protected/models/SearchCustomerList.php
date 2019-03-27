@@ -3,6 +3,7 @@
 class SearchCustomerList extends CListPageModel
 {
     public $searchArrears;//
+    public $searchYear;//
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -24,7 +25,7 @@ class SearchCustomerList extends CListPageModel
     public function rules()
     {
         return array(
-            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchArrears','safe',),
+            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchYear, searchArrears','safe',),
         );
     }
 	
@@ -33,13 +34,21 @@ class SearchCustomerList extends CListPageModel
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 		$firm_str = Yii::app()->user->firm();
+        if(!empty($this->searchYear)){
+            $year = str_replace("'","\'",$this->searchYear);
+        }
+        if(empty($year)||!is_numeric($year)){
+            $year = date("Y");
+        }
+        $this->searchYear = $year;
+
 		$sql1 = "select a.*,b.customer_year,c.client_code,c.customer_name,d.company_code,e.firm_name
 				from sev_customer_firm a 
 				LEFT JOIN sev_firm e ON a.firm_id = e.id
 				LEFT JOIN sev_customer b ON a.customer_id = b.id
 				LEFT JOIN sev_company c ON c.id = b.company_id
 				LEFT JOIN sev_group d ON d.id = b.group_id
-				where a.id >0  
+                WHERE b.customer_year = '$year' 
 			";
         $sql2 = "select count(*)
 				from sev_customer_firm a 
@@ -47,7 +56,7 @@ class SearchCustomerList extends CListPageModel
 				LEFT JOIN sev_customer b ON a.customer_id = b.id
 				LEFT JOIN sev_company c ON c.id = b.company_id
 				LEFT JOIN sev_group d ON d.id = b.group_id
-				where a.id >0  
+                WHERE b.customer_year = '$year' 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
