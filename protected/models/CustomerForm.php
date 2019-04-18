@@ -92,7 +92,7 @@ class CustomerForm extends CFormModel
             array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, info_arr
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,lud','safe'),
 			array('remark','required'),
-			array('info_arr','validateInfoArr'),
+			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
             array('files, removeFileId, docMasterId, no_of_attm','safe'),
 		);
 	}
@@ -321,7 +321,7 @@ class CustomerForm extends CFormModel
         $rows = Yii::app()->db->createCommand()->select("a.*,b.firm_name")->from("sev_customer_firm a")
             ->leftJoin("sev_firm b","b.id= a.firm_id")
             ->where("a.customer_id=:customer_id and a.firm_id in($firm_str)",array(':customer_id'=>$this->customer_id))->queryAll();
-        if($rows){
+/*        if($rows){
             foreach ($rows as &$row){
                 $list = Yii::app()->db->createCommand()->select("*")->from("sev_customer_info")
                     ->where("firm_cus_id=:firm_cus_id",array(':firm_cus_id'=>$row["id"]))->queryAll();
@@ -333,7 +333,7 @@ class CustomerForm extends CFormModel
             }
         }else{
             $rows = array();
-        }
+        }*/
         $this->info_arr = $rows;
     }
 	
@@ -363,9 +363,9 @@ class CustomerForm extends CFormModel
                 }
                 Yii::app()->db->createCommand()->update('sev_customer_firm', array(
                     'curr'=>$value["curr"],
-                    'amt'=>$value["amt"],
+                    //'amt'=>$value["amt"],
                 ), 'id=:id', array(':id'=>$row["id"]));
-
+/*
                 Yii::app()->db->createCommand()->delete('sev_customer_info', 'firm_cus_id=:firm_cus_id', array(':firm_cus_id'=>$row["id"]));
                 if(!empty($value["list"])){
                     foreach ($value["list"] as $item){
@@ -375,7 +375,7 @@ class CustomerForm extends CFormModel
                         $item["lcd"]=date("Y-m-d H:i:s");
                         Yii::app()->db->createCommand()->insert("sev_customer_info", $item);
                     }
-                }
+                }*/
             }
         }
 
