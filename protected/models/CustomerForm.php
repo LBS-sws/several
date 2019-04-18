@@ -220,6 +220,37 @@ class CustomerForm extends CFormModel
         return $html;
     }
 
+    public function printInfoBodyNew($arr,$form){
+        $className = "CustomerForm";
+        $firm_id = $arr["firm_id"];
+        $bool = $this->onlyReadySearch();
+        $html = '<p>&nbsp;</p><div class="form-group">';
+        $html .=TbHtml::label(Yii::t("several","Clients firm"),"",array('class'=>"col-sm-2 control-label"));
+        $html .='<div class="col-sm-5">';
+        $html .=TbHtml::textField($className."[info_arr][$firm_id][firm_name]",$arr["firm_name"],array('readonly'=>(true)));
+        $html .='</div></div>';
+        $html .= '<div class="form-group">';
+        $html .=TbHtml::label(Yii::t("several","Curr"),"",array('class'=>"col-sm-2 control-label"));
+        $html .='<div class="col-sm-5">';
+        $html .=TbHtml::textField($className."[info_arr][$firm_id][curr]",$arr["curr"],array('readonly'=>($bool)));
+        $html .=TbHtml::hiddenField($className."[info_arr][$firm_id][firm_id]",$firm_id);
+        $html .='</div></div>';
+        if(!empty($firm_id)) {
+            //追數詳情
+            $html .= '<div class="form-group">';
+            $html .= TbHtml::label(Yii::t("several", "Info Arr"), "", array('class' => "col-sm-2 control-label"));
+            $html .= '<div class="col-sm-5">';
+            $html .= SearchCustomerForm::getAmtHtml($arr["id"]);
+            $html .= '</div></div>';
+            //流程詳情
+            $html .= '<div class="form-group">';
+            $html .= TbHtml::label(Yii::t("dialog", "Flow Info"), "", array('class' => "col-sm-2 control-label"));
+            $html .= '<div class="col-sm-9">';
+            $html .= SearchCustomerForm::getFlowInfoHtml($arr["id"]);
+            $html .= '</div></div>';
+        }
+        return $html;
+    }
 
     //刪除验证
 	public function validateDelete(){

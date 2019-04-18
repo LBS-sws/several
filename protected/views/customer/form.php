@@ -40,11 +40,6 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
 	</div>
             <div class="btn-group pull-right" role="group">
                 <?php
-                    //流程
-                    echo TbHtml::button('<span class="fa fa-file-text-o"></span> '.Yii::t('dialog','Flow'), array(
-                        'name'=>'btnFlow','id'=>'btnFlow','data-toggle'=>'modal','data-target'=>'#flowinfodialog'));
-                 ?>
-                <?php
                 $counter = ($model->no_of_attm['cust'] > 0) ? ' <span id="doccust" class="label label-info">'.$model->no_of_attm['cust'].'</span>' : ' <span id="doccust"></span>';
                 echo TbHtml::button('<span class="fa  fa-file-text-o"></span> '.Yii::t('misc','Attachment').$counter, array(
                         'name'=>'btnFile','id'=>'btnFile','data-toggle'=>'modal','data-target'=>'#fileuploadcust',)
@@ -183,7 +178,7 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
                     $flag = $item["firm_id"]==$model->firm_id;
                     $tabs[] = array(
                         'label'=>$item["firm_name"],
-                        'content'=>$model->printInfoBody($item,$form),
+                        'content'=>$model->printInfoBodyNew($item,$form),
                         'active'=>$flag,
                     );
                 }
@@ -200,7 +195,6 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
 </section>
 
 <?php
-$this->renderPartial('//site/flowinfo',array('model'=>$model));
 $this->renderPartial('//site/fileupload',array('model'=>$model,
     'form'=>$form,
     'doctype'=>'CUST',

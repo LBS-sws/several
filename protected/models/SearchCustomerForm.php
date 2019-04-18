@@ -151,7 +151,7 @@ class SearchCustomerForm extends CFormModel
     }
 
     //追數詳情
-    private function getAmtHtml($firm_cus_id){
+    public function getAmtHtml($firm_cus_id){
         $html = "";
         $info_all = Yii::app()->db->createCommand()->select("*")->from("sev_customer_info")
             ->where("firm_cus_id=:id", array(':id'=>$firm_cus_id))->order("CAST(amt_name as SIGNED) desc")->queryAll();
@@ -167,7 +167,7 @@ class SearchCustomerForm extends CFormModel
                 $color = $info['amt_num']>0?"bg-danger":"";
                 $html.="<tr class='$color'>";
                 if($info["amt_gt"] != 1){
-                    $html.="<td>".$monthList[$info['amt_name']]."以前</td>";
+                    $html.="<td>".$monthList[$info['amt_name']]."或之前</td>";
                 }else{
                     $html.="<td>".$monthList[$info['amt_name']]."</td>";
                 }
@@ -183,7 +183,7 @@ class SearchCustomerForm extends CFormModel
     }
 
     //流程詳情
-    private function getFlowInfoHtml($firm_cus_id){
+    public function getFlowInfoHtml($firm_cus_id){
         $html = "";
         $info_all = Yii::app()->db->createCommand()->select("a.*,b.disp_name")->from("sev_remark_list a")
             ->leftJoin("sec_user b","a.lcu=b.username")

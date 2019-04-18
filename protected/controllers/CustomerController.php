@@ -98,7 +98,6 @@ class CustomerController extends Controller
             //$loadExcel->clear();
             $model->loadSeveral($list);
             if(empty($model->error_list)){
-                Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
                 $this->redirect(Yii::app()->createUrl('customer/import'));
             }else{
                 $model->exportExcel();

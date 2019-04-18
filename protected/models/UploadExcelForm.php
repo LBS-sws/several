@@ -26,6 +26,9 @@ class UploadExcelForm extends CFormModel
 	protected $excel_list_key;//正在導入的键值
 	protected $add_company_bool;//正在導入的键值
 
+	protected $year_list;//需要導入的年份
+	protected $year_key_list;//需要導入的年份
+
 	public function init()
     {
         $this->year = date("Y");
@@ -58,7 +61,6 @@ class UploadExcelForm extends CFormModel
             array('file,firm_id,year','safe'),
             array('firm_id','required'),
             array('cover_bool','required'),
-            array('year','required'),
             array('firm_id','validateFirmId'),
             array('file', 'file', 'types'=>'xlsx,xls', 'allowEmpty'=>false, 'maxFiles'=>1),
 		);
@@ -78,6 +80,26 @@ class UploadExcelForm extends CFormModel
         }
     }
 
+    private function onlyYearList(){
+        $arr = $this->excel_list;
+        $listHeader =$arr["listHeader"];
+        foreach ($listHeader as $header){
+            if(strpos($header,'年')!==false){
+                $year = current(explode("年",$header));
+                if(is_numeric($year)){
+                    $this->year_key_list[$year]=$year;
+                }
+            }
+        }
+
+        if (empty($this->year_key_list)){
+            Dialog::message(Yii::t('dialog','Validation Message'), "该excel里没有年份，无法导入");
+            return false;
+        }else{
+            return true;
+        }
+    }
+
 	//批量導入（欠款)
     public function loadSeveral($arr){
         set_time_limit(0);
@@ -91,16 +113,20 @@ class UploadExcelForm extends CFormModel
                 return false;
             }
         }
+        $bool = $this->onlyYearList();//查詢頁頭有幾個年份
+        if (!$bool){
+            return false;
+        }
+
         foreach ($arr["listBody"] as $list_key=> $list){
             $continue = true;
             $this->excel_list_key = $list_key;//
             $this->start_title = current($list);//每行的第一個文本
             $this->amtSum=0; //初始化每條數據
-            $this->onlyArrInfo=array(); //初始化每條數據
+            $this->year_list=array(); //初始化每條數據
             $this->onlyArr=array( //初始化每條數據
                 "lcu"=>Yii::app()->user->id,
                 "lcd"=>date("Y-m-d H:i:s"),
-                "customer_year"=>date("Y"),
             );
 
             foreach ($list as $key=>$value){
@@ -111,33 +137,29 @@ class UploadExcelForm extends CFormModel
                 }
             }
             if($continue){
-                $thisAmt = floatval($this->onlyArr["amt"]);
-
-                unset($this->onlyArr["amt"]);
-                if($this->amtSum != $thisAmt){
-                    array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>"剩餘數額計算錯誤，請重新計算:$thisAmt"));
-                    $continue = false;
-                    $errNum++;
-                }else{
-                    $successNum++;
+                //導入數據
+                foreach ($this->year_list as $year_key => $arrInfoList){
+                    $this->year = $year_key;
+                    $this->amtSum = $arrInfoList["amtSum"];
+                    $insetId = $this->insertCustormer();
+                    if(!empty($arrInfoList["list"])){
+                        foreach ($arrInfoList["list"] as $item){
+                            $item["firm_cus_id"]=$insetId;
+                            $item["customer_id"]=$this->customer_id;
+                            Yii::app()->db->createCommand()->insert("sev_customer_info", $item);
+                        }
+                    }
                 }
             }else{
                 $errNum++;
             }
 
-            if($continue){ //導入數據
-                $insetId = $this->insertCustormer();
-                FunctionForm::refreshGroupOne($this->onlyArr["group_id"]);//刷新集團編號的次數及銷售員
-                if(!empty($this->onlyArrInfo)){
-                    foreach ($this->onlyArrInfo as $item){
-                        $item["firm_cus_id"]=$insetId;
-                        $item["customer_id"]=$this->customer_id;
-                        Yii::app()->db->createCommand()->insert("sev_customer_info", $item);
-                    }
-                }
-            }
         }
 
+        if($errNum == 0){
+            Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
+        }
+        FunctionForm::refreshGroupAll();//刷新集團編號的次數及銷售員
 /*        $error = implode("<br>",$this->error_list);
         Dialog::message(Yii::t('dialog','Information'), Yii::t('several','Success Num：').$successNum."<br>".Yii::t('several','Error Num：').$errNum."<br>".$error);*/
     }
@@ -162,6 +184,7 @@ class UploadExcelForm extends CFormModel
         $row = Yii::app()->db->createCommand()->select("id,firm_name_id")->from("sev_customer")
             ->where('company_id=:company_id AND customer_year=:customer_year',array(':company_id'=>$onlyArr["company_id"],':customer_year'=>$this->year))->queryRow();
         if($row){//如果已存在客戶關係
+            Yii::app()->db->createCommand()->update("sev_customer", $onlyArr,"id=:id",array(":id"=>$row["id"]));
             $this->customer_id = $row["id"];
             $arr = Yii::app()->db->createCommand()->select("id")->from("sev_customer_firm")
                 ->where('customer_id=:customer_id AND firm_id=:firm_id',array(':customer_id'=>$row["id"],':firm_id'=>$this->firm_id))->queryRow();
@@ -189,6 +212,7 @@ class UploadExcelForm extends CFormModel
                     "group_id"=>$onlyArr["group_id"],
                 ),"id=:id",array(":id"=>$onlyArr["company_id"]));
             }
+            $onlyArr["customer_year"]=$this->year;
             $onlyArr["firm_name_id"]=$this->firm_id;
             $onlyArr["firm_name_us"]=$this->firm_name_us;
             Yii::app()->db->createCommand()->insert("sev_customer", $onlyArr);
@@ -238,9 +262,33 @@ class UploadExcelForm extends CFormModel
         Dialog::message(Yii::t('dialog','Information'), Yii::t('several','Success Num：').$successNum."<br>".Yii::t('several','Error Num：').$errNum."<br>".$error);
     }
 
+    private function getMonthKeyToStr($str){
+        $monthList = $this->getMonth();
+        if(strpos($str,'年')!==false){
+            $list = explode("年",$str);
+            if(count($list)==2 && is_numeric($list[0])){
+                $year = $list[0];
+                $month = $list[1];
+                $this->year_list[$year] = array(
+                    "amtSum"=>0,
+                    "list"=>array()
+                );
+
+                $monthKey = array_search($month,$monthList);
+                if ($monthKey !== false){
+                    return array(
+                        "monthKey"=>$monthKey,
+                        "year"=>$year
+                    );
+                }
+            }
+        }
+        return false;
+    }
+
     private function validateList($headStr,$value){
         $headList = $this->getList();
-        $monthList = $this->getMonth();
+        //判斷是否為必須字段
         foreach ($headList as $list){
             if($list["name"] == $headStr){
                 //開始驗證
@@ -272,27 +320,30 @@ class UploadExcelForm extends CFormModel
                 return true;
             }
         }
+
+        //判斷是否為時間
         $amt_gt = 1;
-        if(strpos($headStr,'月或之')!==false){
+        if(strpos($headStr,'月或之前')!==false){
             $amt_gt = 0;
             $headStr = current(explode("或之",$headStr));
         }
-        $monthKey = array_search($headStr,$monthList);
-        if ($monthKey !== false){
+        $arrList = $this->getMonthKeyToStr($headStr);
+        if ($arrList !== false){
             if(is_numeric($value)){
-                if(floatval($value)<0){
-                    array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."必須大於零（$headStr）"));
+/*                if(floatval($value)<0){
+                    array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."必須大於零（".$headStr."）"));
                     return false;
-                }
-                $this->amtSum+=floatval($value);
-                $this->onlyArrInfo[]=array(
+                }*/
+                //$this->amtSum+=floatval($value);
+                $this->year_list[$arrList["year"]]["amtSum"]+=floatval($value);
+                $this->year_list[$arrList["year"]]["list"][]=array(
                     "amt_gt"=>$amt_gt,
-                    "amt_name"=>$monthKey,
+                    "amt_name"=>$arrList["monthKey"],
                     "amt_num"=>$value,
                     "lcu"=>Yii::app()->user->id,
                 );
             }else{
-                array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."只能為數字（$headStr）"));
+                array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."只能為數字（".$headStr."）"));
                 return false;
             }
 
@@ -386,13 +437,16 @@ class UploadExcelForm extends CFormModel
                 if($rows){
 
                     if($this->cover_bool == 1){
-                        $year = $this->year;
-                        $arr = Yii::app()->db->createCommand()->select("b.id")->from("sev_customer_firm a")
-                            ->leftJoin("sev_customer b","a.customer_id = b.id")
-                            ->where('b.company_id=:company_id and b.customer_year=:year and a.firm_id=:firm_id',
-                                array(':company_id'=>$rows["id"],':year'=>$year,':firm_id'=>$this->firm_id))->queryRow();
-                        if($arr){
-                            return array("status"=>0,"error"=>"該客戶在 $year 已存在，不可重複添加。重複ID：".$arr["id"]);
+                        if (!empty($this->year_key_list)){
+                            foreach ($this->year_key_list as $year){
+                                $arr = Yii::app()->db->createCommand()->select("b.id")->from("sev_customer_firm a")
+                                    ->leftJoin("sev_customer b","a.customer_id = b.id")
+                                    ->where('b.company_id=:company_id and b.customer_year=:year and a.firm_id=:firm_id',
+                                        array(':company_id'=>$rows["id"],':year'=>$year,':firm_id'=>$this->firm_id))->queryRow();
+                                if($arr){
+                                    return array("status"=>0,"error"=>"該客戶在 $year 已存在，不可重複添加。重複ID：".$arr["id"]);
+                                }
+                            }
                         }
                     }
 
@@ -420,6 +474,9 @@ class UploadExcelForm extends CFormModel
     }
 
     public function validateStaff($value){
+        if(empty($value)){
+            return array("status"=>1,"value"=>"");
+        }
         $rows = Yii::app()->db->createCommand()->select("id")->from("sev_staff")
             ->where('staff_name=:staff_name',array(':staff_name'=>$value))->queryRow();
         if($rows){
@@ -435,8 +492,10 @@ class UploadExcelForm extends CFormModel
             array("name"=>"客戶編號","sqlName"=>"client_code","empty"=>true,"fun"=>"validateCusCode"),
             array("name"=>"客戶名稱","sqlName"=>"customer_name","empty"=>true,"fun"=>"validateCusCode"),
             array("name"=>"集團號碼","sqlName"=>"group_id","empty"=>false,"fun"=>"validateGroupOld"),
+            array("name"=>"指派員工","sqlName"=>"staff_id","empty"=>false,"fun"=>"validateStaff"),
+            array("name"=>"銷售員","sqlName"=>"salesman_id","empty"=>false,"fun"=>"validateStaff"),
             //array("name"=>"貨幣","sqlName"=>"curr","empty"=>true),
-            array("name"=>"剩餘數額","sqlName"=>"amt","empty"=>false),
+            //array("name"=>"剩餘數額","sqlName"=>"amt","empty"=>false),
         );
         return $arr;
     }

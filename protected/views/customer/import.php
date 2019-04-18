@@ -41,15 +41,6 @@ $this->pageTitle=Yii::app()->name . ' - Customer Import';
 		<div class="box-body">
 
             <div class="form-group">
-                <?php echo $form->labelEx($model,'year',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-2">
-                    <?php echo $form->dropDownList($model, 'year',$model->getYear(),
-                        array('readonly'=>(false),'class'=>'form-control')
-                    ); ?>
-                </div>
-            </div>
-
-            <div class="form-group">
                 <?php echo $form->labelEx($model,'firm_id',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-3">
                     <?php echo $form->dropDownList($model, 'firm_id',FirmForm::getFirmList(),

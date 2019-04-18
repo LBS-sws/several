@@ -10,13 +10,10 @@ class FunctionForm extends CFormModel
     //手動刷新集團的銷售列表
     public function refreshGroupAll(){
         $year = date("Y");
-        $rows = Yii::app()->db->createCommand()->select("a.id,a.group_id, COUNT(b.id) AS num")->from("sev_customer a")
-            ->leftJoin("sev_group b","b.id = a.group_id")
-            //->where('a.customer_year=:year',array(':year'=>$year)) //暫時不按年份統計
-            ->group("b.id")->queryAll();
+        $rows = Yii::app()->db->createCommand()->select("id")->from("sev_group")->queryAll();
         if($rows){
             foreach ($rows as $row){
-                $this->refreshGroupOne($row["group_id"],$row["num"]);
+                FunctionForm::refreshGroupOne($row["id"]);
             }
         }
     }

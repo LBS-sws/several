@@ -85,7 +85,7 @@ class SearchCustomerList extends CListPageModel
 		if($this->searchArrears == "on arrears"){
             $clause .= " and a.amt>0";
         }elseif ($this->searchArrears == "off arrears"){
-            $clause .= " and (a.amt = 0 or a.amt = '' or a.amt is null)";
+            $clause .= " and (a.amt <= 0 or a.amt = '' or a.amt is null)";
         }
 		
 		$order = "";

@@ -46,6 +46,10 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
     );
     $search_add_html="";
     $modelName = get_class($model);
+    $yearList = UploadExcelForm::getYear();
+    $yearList[""]="全部";
+    $search_add_html .= TbHtml::dropDownList($modelName.'[searchYear]',$model->searchYear,$yearList,
+        array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
     $search_add_html .= TbHtml::dropDownList($modelName.'[searchArrears]',$model->searchArrears,$model->getArrearsList(),
         array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
 

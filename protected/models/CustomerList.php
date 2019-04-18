@@ -3,6 +3,7 @@
 class CustomerList extends CListPageModel
 {
     public $searchArrears;//
+    public $searchYear;//
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -24,7 +25,7 @@ class CustomerList extends CListPageModel
     public function rules()
     {
         return array(
-            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchArrears','safe',),
+            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchYear, searchArrears','safe',),
         );
     }
 	
@@ -33,6 +34,7 @@ class CustomerList extends CListPageModel
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 		$firm_str = Yii::app()->user->firm();
+
 		$sql1 = "select a.*,b.customer_year,c.client_code,c.customer_name,d.company_code,e.firm_name
 				from sev_customer_firm a 
 				LEFT JOIN sev_firm e ON a.firm_id = e.id
@@ -53,7 +55,7 @@ class CustomerList extends CListPageModel
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
 			$svalue = str_replace("'","\'",$this->searchValue);
 			switch ($this->searchField) {
-				case 'sev_firm':
+				case 'firm_name':
 					$clause .= General::getSqlConditionClause('e.firm_name',$svalue);
 					break;
 				case 'client_code':
@@ -76,7 +78,12 @@ class CustomerList extends CListPageModel
 		if($this->searchArrears == "on arrears"){
             $clause .= " and a.amt>0";
         }elseif ($this->searchArrears == "off arrears"){
-            $clause .= " and (a.amt = 0 or a.amt = '' or a.amt is null)";
+            $clause .= " and (a.amt <= 0 or a.amt = '' or a.amt is null)";
+        }
+
+        if(!empty($this->searchYear)){
+            $year = str_replace("'","\'",$this->searchYear);
+            $clause .= " and b.customer_year = '$year' ";
         }
 		
 		$order = "";
