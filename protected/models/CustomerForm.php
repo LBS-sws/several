@@ -262,6 +262,19 @@ class CustomerForm extends CFormModel
         return false;
     }
 
+
+    public function getFirmList(){
+        $firm_str = Yii::app()->user->firm();
+        $arr=array();
+        $rows = Yii::app()->db->createCommand()->select("id,firm_name")->from("sev_firm")->where("id in ($firm_str)")->order("z_index desc")->queryAll();
+        if($rows){
+            foreach ($rows as $row){
+                $arr[$row["id"]] = $row["firm_name"];
+            }
+        }
+        return $arr;
+    }
+
 	public function retrieveData($index)
 	{
         $firm_str = Yii::app()->user->firm();
