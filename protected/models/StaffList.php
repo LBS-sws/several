@@ -92,6 +92,7 @@ class StaffList extends CListPageModel
 	        ""=>$str,
 	        "1"=>Yii::t("several","technician"),
 	        "2"=>Yii::t("several","salesman"),
+	        "3"=>Yii::t("several","clerk"),
         );
     }
 

@@ -93,5 +93,11 @@ return array(
     'collection number'=>'代收款次數',
     'Firm List'=>'LBS公司列表',
     'Staff List'=>'員工列表',
+
+    'group type'=>'客戶類型',
+    'not group'=>'非集團客戶',
+    'is group'=>'集團客戶',
+    'payment'=>'付款期限',
+    'clerk'=>'會計文員',
 );
 ?>

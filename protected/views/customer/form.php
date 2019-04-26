@@ -155,8 +155,14 @@ $this->pageTitle=Yii::app()->name . ' - customer Form';
             </div>
             <div class="form-group">
                 <?php echo $form->labelEx($model,'acca_fun',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-5">
+                <div class="col-sm-3">
                     <?php echo $form->textField($model, 'acca_fun',
+                        array('readonly'=>($model->scenario=='view'))
+                    ); ?>
+                </div>
+                <?php echo $form->labelEx($model,'payment',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'payment',
                         array('readonly'=>($model->scenario=='view'))
                     ); ?>
                 </div>

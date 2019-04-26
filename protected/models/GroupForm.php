@@ -216,7 +216,6 @@ class GroupForm extends CFormModel
 		}
 		catch(Exception $e) {
 			$transaction->rollback();
-			var_dump($e);
 			throw new CHttpException(404,'Cannot update.');
 		}
 	}
@@ -276,7 +275,17 @@ class GroupForm extends CFormModel
             $this->id = Yii::app()->db->getLastInsertID();
             $this->setScenario("edit");
         }
+
+        $this->resetClientStaff();//即時更新客戶
         return true;
 	}
 
+	private function resetClientStaff(){
+        if(!empty($this->assign_id)){
+            Yii::app()->db->createCommand()->update("sev_customer", array(
+                "staff_id"=>$this->assign_id,
+            ),"group_id=:group_id and (staff_id is null or staff_id='')",array(":group_id"=>$this->id));
+            //Yii::app()->end();
+        }
+    }
 }

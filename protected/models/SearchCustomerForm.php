@@ -29,6 +29,7 @@ class SearchCustomerForm extends CFormModel
     public $salesman_id;
     public $staff_id;
     public $lud;
+    public $payment;
 
 
     public $firm_name;
@@ -68,6 +69,7 @@ class SearchCustomerForm extends CFormModel
             'amt'=>Yii::t('several','Amt'),
             'remark'=>Yii::t('several','Update Remark'),
             'info_arr'=>Yii::t('several','Info Arr'),
+            'payment'=>Yii::t('several','payment'),
         );
     }
 

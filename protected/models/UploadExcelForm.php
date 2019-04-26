@@ -28,6 +28,9 @@ class UploadExcelForm extends CFormModel
 
 	protected $year_list;//需要導入的年份
 	protected $year_key_list;//需要導入的年份
+	protected $group_type = 0;
+	protected $client_code = "";
+	protected $staffOnlyList;
 
 	public function init()
     {
@@ -118,6 +121,7 @@ class UploadExcelForm extends CFormModel
             return false;
         }
 
+        $this->resetStaffOnlyList();//添加必須存在的員工
         foreach ($arr["listBody"] as $list_key=> $list){
             $continue = true;
             $this->excel_list_key = $list_key;//
@@ -181,6 +185,8 @@ class UploadExcelForm extends CFormModel
 
     protected function insertCustormer(){
         $onlyArr = $this->onlyArr;
+        $onlyArr["group_type"]=$this->group_type;
+        $this->autoOnlyArr($onlyArr);
         $row = Yii::app()->db->createCommand()->select("id,firm_name_id")->from("sev_customer")
             ->where('company_id=:company_id AND customer_year=:customer_year',array(':company_id'=>$onlyArr["company_id"],':customer_year'=>$this->year))->queryRow();
         if($row){//如果已存在客戶關係
@@ -207,9 +213,11 @@ class UploadExcelForm extends CFormModel
                 return Yii::app()->db->getLastInsertID();
             }
         }else{
+
             if($this->add_company_bool){
                 Yii::app()->db->createCommand()->update("sev_company", array(
                     "group_id"=>$onlyArr["group_id"],
+                    "group_type"=>$onlyArr["group_type"]
                 ),"id=:id",array(":id"=>$onlyArr["company_id"]));
             }
             $onlyArr["customer_year"]=$this->year;
@@ -224,6 +232,36 @@ class UploadExcelForm extends CFormModel
             ));
             return Yii::app()->db->getLastInsertID();
         }
+    }
+
+    protected function autoOnlyArr(&$str){
+        if (empty($this->group_type)&&!key_exists("staff_id",$str)){//如果是非集團客戶
+            $client_code = $this->client_code;
+            $client_code = intval($client_code);
+            if(is_numeric($client_code)){
+                if($client_code<=10){
+                    $str["staff_id"] = $this->staffOnlyList["LISA"];
+                }elseif (($client_code>=11&&$client_code<=119)||$client_code>=300){
+                    $str["staff_id"] = $this->staffOnlyList["NATALIE"];
+                }elseif ($client_code>=120&&$client_code<=199){
+                    $str["staff_id"] = $this->staffOnlyList["JOANN"];
+                }elseif ($client_code>=200&&$client_code<=299){
+                    $str["staff_id"] = $this->staffOnlyList["DAVID"];
+                }
+            }
+        }
+    }
+
+    private function getGroupType($str){
+        $group_type = 0;
+        $code = $str;
+        if(!empty($code)){
+            $code = current(str_split($code,1));
+            if($code != "z"&&$code!="Z"){
+                $group_type = 1;
+            }
+        }
+        return $group_type;
     }
 
 	//批量導入（集團編號)
@@ -269,10 +307,12 @@ class UploadExcelForm extends CFormModel
             if(count($list)==2 && is_numeric($list[0])){
                 $year = $list[0];
                 $month = $list[1];
-                $this->year_list[$year] = array(
-                    "amtSum"=>0,
-                    "list"=>array()
-                );
+                if(!key_exists($year,$this->year_list)){
+                    $this->year_list[$year] = array(
+                        "amtSum"=>0,
+                        "list"=>array()
+                    );
+                }
 
                 $monthKey = array_search($month,$monthList);
                 if ($monthKey !== false){
@@ -403,6 +443,7 @@ class UploadExcelForm extends CFormModel
     }
 
     public function validateGroupOld($value){
+        $this->group_type = $this->getGroupType($value);
         if(!empty($value)){
             $rows = Yii::app()->db->createCommand()->select("id")->from("sev_group")
                 ->where('company_code=:company_code',array(':company_code'=>$value))->queryRow();
@@ -431,6 +472,7 @@ class UploadExcelForm extends CFormModel
                     $client_code = $arr["client_code"];
                     $customer_name = $value;
                 }
+                $this->client_code = $client_code;
                 $rows = Yii::app()->db->createCommand()->select("id")->from("sev_company")
                     ->where("client_code=:client_code and customer_name=:customer_name",
                         array(':client_code'=>$client_code,':customer_name'=>$customer_name))->queryRow();
@@ -494,6 +536,7 @@ class UploadExcelForm extends CFormModel
             array("name"=>"集團號碼","sqlName"=>"group_id","empty"=>false,"fun"=>"validateGroupOld"),
             array("name"=>"指派員工","sqlName"=>"staff_id","empty"=>false,"fun"=>"validateStaff"),
             array("name"=>"銷售員","sqlName"=>"salesman_id","empty"=>false,"fun"=>"validateStaff"),
+            array("name"=>"付款期限","sqlName"=>"payment","empty"=>true),
             //array("name"=>"貨幣","sqlName"=>"curr","empty"=>true),
             //array("name"=>"剩餘數額","sqlName"=>"amt","empty"=>false),
         );
@@ -508,6 +551,22 @@ class UploadExcelForm extends CFormModel
             array("name"=>"跨區","sqlName"=>"cross_district","empty"=>false),
         );
         return $arr;
+    }
+
+    private function resetStaffOnlyList(){
+        $arr = array();
+        $staffList = array("LISA","NATALIE","JOANN","DAVID");
+        foreach ($staffList as $staff){
+            $rows = Yii::app()->db->createCommand()->select("id")->from("sev_staff")
+                ->where('staff_name=:staff_name',array(':staff_name'=>$staff))->queryRow();
+            if($rows){
+                $arr[$staff] = $rows["id"];
+            }else{
+                Yii::app()->db->createCommand()->insert("sev_staff", array("staff_name"=>$staff));
+                $arr[$staff] = Yii::app()->db->getLastInsertID();
+            }
+        }
+        $this->staffOnlyList = $arr;
     }
 
     public function getMonth(){

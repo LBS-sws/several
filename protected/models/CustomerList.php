@@ -11,7 +11,7 @@ class CustomerList extends CListPageModel
 	 */
 	public function attributeLabels()
 	{
-		return array(	
+		return array(
 			'id'=>Yii::t('several','ID'),
 			'firm_name'=>Yii::t('several','in firm'),
 			'client_code'=>Yii::t('several','Customer Code'),
@@ -20,6 +20,19 @@ class CustomerList extends CListPageModel
 			'company_code'=>Yii::t('several','Company Code'),
 			'curr'=>Yii::t('several','Curr'),
 			'amt'=>Yii::t('several','Amt'),
+
+            'acca_username'=>Yii::t('several','accountant username'),
+            'acca_phone'=>Yii::t('several','accountant phone'),
+            'acca_lang'=>Yii::t('several','accountant lang'),
+            'acca_discount'=>Yii::t('several','discount'),
+            'acca_remark'=>Yii::t('several','accountant remark'),
+            'acca_fun'=>Yii::t('several','method'),
+            'salesman_id'=>Yii::t('several','salesman'),
+            'staff_id'=>Yii::t('several','assign staff'),
+            'phone'=>Yii::t('several','phone'),
+            'group_type'=>Yii::t('several','group type'),
+            'lud'=>Yii::t('several','last time'),
+            'payment'=>Yii::t('several','payment'),
 		);
 	}
     public function rules()
@@ -35,7 +48,7 @@ class CustomerList extends CListPageModel
 		$city = Yii::app()->user->city_allow();
 		$firm_str = Yii::app()->user->firm();
 
-		$sql1 = "select a.*,b.customer_year,c.client_code,c.customer_name,d.company_code,e.firm_name
+		$sql1 = "select a.customer_id,a.firm_id,a.curr,a.amt,a.id as s_id,b.*,c.client_code,c.customer_name,d.company_code,e.firm_name
 				from sev_customer_firm a 
 				LEFT JOIN sev_firm e ON a.firm_id = e.id
 				LEFT JOIN sev_customer b ON a.customer_id = b.id
@@ -103,10 +116,12 @@ class CustomerList extends CListPageModel
 
 		$this->attr = array();
 		if (count($records) > 0) {
+		    $StaffForm = new StaffForm();
+		    $langList = FunctionForm::getAllLang();
 			foreach ($records as $k=>$record) {
 			    $color = floatval($record['amt'])>0?"text-danger":"text-primary";
 				$this->attr[] = array(
-					'id'=>$record['id'],
+					'id'=>$record['s_id'],
 					'customer_id'=>$record['customer_id'],
 					'firm_name'=>$record['firm_name'],
 					'client_code'=>$record['client_code'],
@@ -114,8 +129,17 @@ class CustomerList extends CListPageModel
 					'customer_year'=>$record['customer_year'],
 					'company_code'=>$record['company_code'],
 					'curr'=>$record['curr'],
-					'amt'=>$record['amt'],
-					'color'=>$color,
+                    'amt'=>$record['amt'],
+                    'color'=>$color,
+
+					'staff_id'=>$StaffForm->getStaffNameToId($record['staff_id']),
+					'salesman_id'=>$StaffForm->getStaffNameToId($record['salesman_id']),
+					'payment'=>$record['payment'],
+					'group_type'=>empty($record['group_type'])?Yii::t("several","not group"):Yii::t("several","is group"),
+					'acca_username'=>$record['acca_username'],
+					'acca_phone'=>$record['acca_phone'],
+					'acca_fun'=>$record['acca_fun'],
+					'acca_lang'=>$langList[$record['acca_lang']],
 				);
 			}
 		}

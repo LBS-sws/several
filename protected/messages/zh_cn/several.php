@@ -95,5 +95,11 @@ return array(
     'Firm List'=>'LBS公司列表',
     'Staff List'=>'员工列表',
 
+    'group type'=>'客户类型',
+    'not group'=>'非集团客户',
+    'is group'=>'集团客户',
+    'payment'=>'付款期限',
+    'clerk'=>'会计文员',
+
 );
 ?>

@@ -29,6 +29,7 @@ class CustomerForm extends CFormModel
 	public $salesman_id;
 	public $staff_id;
 	public $lud;
+	public $payment;
 
 
 	public $info_arr=array();
@@ -79,6 +80,7 @@ class CustomerForm extends CFormModel
             'amt'=>Yii::t('several','Amt'),
             'remark'=>Yii::t('several','Update Remark'),
             'info_arr'=>Yii::t('several','Info Arr'),
+            'payment'=>Yii::t('several','payment'),
         );
 	}
 
@@ -90,7 +92,7 @@ class CustomerForm extends CFormModel
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
             array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, info_arr
-            ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,lud','safe'),
+            ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,payment,lud','safe'),
 			array('remark','required'),
 			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
             array('files, removeFileId, docMasterId, no_of_attm','safe'),
@@ -304,6 +306,7 @@ class CustomerForm extends CFormModel
                 $this->acca_lang = $row['acca_lang'];
                 $this->acca_discount = $row['acca_discount'];
                 $this->lud = $row['lud'];
+                $this->payment = $row['payment'];
 
                 $this->no_of_attm['cust'] = $row['custdoc'];
 /*                $this->curr = $row['curr'];
@@ -348,7 +351,8 @@ class CustomerForm extends CFormModel
             'acca_remark'=>$this->acca_remark,
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
-            'acca_discount'=>$this->acca_discount
+            'acca_discount'=>$this->acca_discount,
+            'payment'=>$this->payment
         ), 'id=:id', array(':id'=>$this->customer_id));
         foreach ($list as $key => $value){
             if(!in_array($key,$firm_list)){

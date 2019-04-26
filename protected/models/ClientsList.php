@@ -2,6 +2,7 @@
 
 class ClientsList extends CListPageModel
 {
+    public $searchYear;//
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -19,10 +20,22 @@ class ClientsList extends CListPageModel
 			'firm_name_us'=>Yii::t('several','Clients to firm'),
 		);
 	}
+    public function rules()
+    {
+        return array(
+            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchYear','safe',),
+        );
+    }
 	
 	public function retrieveDataByPage($pageNum=1)
 	{
-	    $year = date("Y");
+
+        if(!empty($this->searchYear)){
+            $year = str_replace("'","\'",$this->searchYear);
+        }else{
+            $year = date("Y");
+        }
+        $this->searchYear = $year;
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 		$sql1 = "select a.*,b.client_code,b.customer_name,d.staff_name,e.company_code,f.staff_name as salesman 

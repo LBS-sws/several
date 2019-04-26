@@ -13,6 +13,7 @@ class ClientsForm extends CFormModel
 	public $staff_id;
 	public $salesman_id;
 	public $group_id;
+	public $group_type=0;
 	public $firm_name_id;
 	public $firm_name_us;
 	public $customer_year;
@@ -144,12 +145,20 @@ class ClientsForm extends CFormModel
 
 	public function validateGroup($attribute, $params){
 	    $group_id = $this->getAttributes()[$attribute];
-	    if(!empty($staff_id)){
-            $rows = Yii::app()->db->createCommand()->select("id")->from("sev_group")
+	    if(!empty($group_id)){
+            $rows = Yii::app()->db->createCommand()->select("id,company_code")->from("sev_group")
                 ->where('id=:id',array(':id'=>$group_id))->queryRow();
             if(!$rows){
                 $message = Yii::t('several','company Code'). Yii::t('several',' does not exist');
                 $this->addError($attribute,$message);
+            }else{
+                $code = $rows["company_code"];
+                if(!empty($code)){
+                    $code = current(str_split($code,1));
+                    if($code != "z"&&$code!="Z"){
+                        $this->group_type = 1;
+                    }
+                }
             }
         }
     }
@@ -241,9 +250,9 @@ class ClientsForm extends CFormModel
 				break;
 			case 'new':
 				$sql = "insert into sev_customer(
-							company_id, staff_id, salesman_id, group_id, customer_year, firm_name_id, firm_name_us, lcu,lcd
+							company_id, staff_id, salesman_id, group_id, group_type, customer_year, firm_name_id, firm_name_us, lcu,lcd
 						) values (
-							:company_id, :staff_id, :salesman_id, :group_id, :customer_year, :firm_name_id, :firm_name_us, :lcu,:lcd
+							:company_id, :staff_id, :salesman_id, :group_id, :group_type, :customer_year, :firm_name_id, :firm_name_us, :lcu,:lcd
 						)";
 				break;
 			case 'edit':
@@ -251,6 +260,7 @@ class ClientsForm extends CFormModel
 							staff_id = :staff_id, 
 							salesman_id = :salesman_id, 
 							group_id = :group_id, 
+							group_type = :group_type, 
 							firm_name_id = :firm_name_id, 
 							firm_name_us = :firm_name_us, 
 							luu = :luu
@@ -270,6 +280,8 @@ class ClientsForm extends CFormModel
 			$command->bindParam(':salesman_id',$this->salesman_id,PDO::PARAM_INT);
 		if (strpos($sql,':group_id')!==false)
 			$command->bindParam(':group_id',$this->group_id,PDO::PARAM_INT);
+		if (strpos($sql,':group_type')!==false)
+			$command->bindParam(':group_type',$this->group_type,PDO::PARAM_INT);
 		if (strpos($sql,':customer_year')!==false){
 		    $year = date("Y");
             $command->bindParam(':customer_year',$year,PDO::PARAM_INT);

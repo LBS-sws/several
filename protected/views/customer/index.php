@@ -8,6 +8,10 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
     'clientOptions'=>array('validateOnSubmit'=>true,),
     'layout'=>TbHtml::FORM_LAYOUT_INLINE,
 )); ?>
+<style>
+    .table-responsive>div:last-child{overflow-x: auto;width: 100%;}
+    #tblData{width: 1700px;}
+</style>
 
 <section class="content-header">
     <h1>

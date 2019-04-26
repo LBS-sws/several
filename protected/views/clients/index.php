@@ -45,10 +45,10 @@ $this->pageTitle=Yii::app()->name . ' - clients';
         'staff_name',
         'salesman',
     );
-/*    $search_add_html="";
+    $search_add_html="";
     $modelName = get_class($model);
-    $search_add_html .= TbHtml::dropDownList($modelName.'[searchArrears]',$model->searchArrears,$model->getArrearsList(),
-        array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));*/
+    $search_add_html .= TbHtml::dropDownList($modelName.'[searchYear]',$model->searchYear,UploadExcelForm::getYear(),
+        array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
 
    $this->widget('ext.layout.ListPageWidget', array(
         'title'=>Yii::t('several','After Clients List'),
@@ -57,7 +57,7 @@ $this->pageTitle=Yii::app()->name . ' - clients';
         'viewdtl'=>'//clients/_listdtl',
         'gridsize'=>'24',
         'height'=>'600',
-       //'search_add_html'=>$search_add_html,
+       'search_add_html'=>$search_add_html,
         'search'=>$search,
     ));
     ?>

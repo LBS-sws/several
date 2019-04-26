@@ -134,6 +134,12 @@ $this->pageTitle=Yii::app()->name . ' - searchCustomer Form';
                         array('readonly'=>(true))
                     ); ?>
                 </div>
+                <?php echo $form->labelEx($model,'payment',array('class'=>"col-sm-2 control-label")); ?>
+                <div class="col-sm-3">
+                    <?php echo $form->textField($model, 'payment',
+                        array('readonly'=>(true))
+                    ); ?>
+                </div>
             </div>
             <legend><?php echo Yii::t("several","arrears info"); ?></legend>
             <?php
