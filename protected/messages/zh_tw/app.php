@@ -90,6 +90,7 @@ return array(
     'Search Firm'=>'LBS公司查詢',
     'Search Staff'=>'指派員工查詢',
     'Search Customer'=>'查詢追數詳情',
+    'import several info'=>'追數導入狀態',
     //沈超添加结束
 );
 ?>

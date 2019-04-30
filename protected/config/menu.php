@@ -21,6 +21,10 @@ return array(
                 'access'=>'MR02',
                 'url'=>'/clients/index',
             ),
+            'import several info'=>array(
+                'access'=>'MR03',
+                'url'=>'/import/index',
+            ),
         ),
     ),
 	'Security'=>array(//保安

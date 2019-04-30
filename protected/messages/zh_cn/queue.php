@@ -7,6 +7,7 @@ return array(
 	'Comp. Date'=>'完成日期',
 	'Format'=>'格式',
 	'Report'=>'报表',
+    'file name'=>'文件名称',
 	'ID'=>'编号',
 	'** Records will be kept in the system for 14 days only.'
 	=>'** 报表将被保存在系统中14天，然后自动删除。',

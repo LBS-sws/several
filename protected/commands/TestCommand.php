@@ -1,77 +1,54 @@
 <?php
 class TestCommand extends CConsoleCommand {
-	protected $webroot;
-	
-	public function run($args) {
-		
-$zip = new clsTbsZip(); 		
+    public function run() {
+        echo "start";
+        $row = Yii::app()->db->createCommand()->select("id")->from("sev_file")->where("state='I'")->queryRow();
+        if($row){ //如果有進行中的任務，不執行
+            return false;
+        }
+        $this->removeExcel();//刪除過期的任務
+        $row = Yii::app()->db->createCommand()->select("file_url,id,lcu")->from("sev_file")->where("state='P'")->queryRow();
+        if($row){
+            $model = new UploadExcelForm();
+            Yii::app()->db->createCommand()->update("sev_file", array("state"=>"I"),"id=:id",array(":id"=>$row["id"]));
+            $model->lcu = $row["lcu"];
+            $attr = $model->attributeLabels();
+            $rows = Yii::app()->db->createCommand()->select("option_name,option_value")->from("sev_file_info")->where("file_id=:id",array(":id"=>$row["id"]))->queryAll();
+            foreach ($rows as $item){
+                if (key_exists($item["option_name"],$attr)){
+                    $model[$item["option_name"]] = $item["option_value"];
+                }
+            }
+            $model->validateFirmId(1,2);
+            $loadExcel = new LoadExcel($row["file_url"]);
+            $list = $loadExcel->getExcelList();
+            //$loadExcel->clear();
+            $model->loadSeveral($list);
+            if(empty($model->error_list)){
+                Yii::app()->db->createCommand()->update("sev_file", array("state"=>"C","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+            }else{
+                Yii::app()->db->createCommand()->update("sev_file", array("state"=>"F","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+                $model->exportExcel($row["file_url"]);
+            }
+        }
+        echo "end";
+        die();
+    }
 
-$path1 = Yii::app()->basePath.'/commands/template/tc1.docx';
-$path2 = Yii::app()->basePath.'/commands/template/tc2.docx';
-$path3 = Yii::app()->basePath.'/commands/template/tc3.docx';
-$path4 = Yii::app()->basePath.'/commands/template/tc4.docx';
-
-// Open the first document
-$zip->Open($path4);
-$content4 = $zip->FileRead('word/document.xml');
-$zip->Close();
-
-// Extract the content of the first document
-$p = strpos($content4, '<w:body');
-if ($p===false) exit("Tag <w:body> not found in document 1.");
-$p = strpos($content4, '>', $p);
-$content4 = substr($content4, $p+1);
-$p = strpos($content4, '</w:body>');
-if ($p===false) exit("Tag </w:body> not found in document 1.");
-$content4 = substr($content4, 0, $p);
-
-// Open the first document
-$zip->Open($path3);
-$content3 = $zip->FileRead('word/document.xml');
-$zip->Close();
-
-// Extract the content of the first document
-$p = strpos($content3, '<w:body');
-if ($p===false) exit("Tag <w:body> not found in document 1.");
-$p = strpos($content3, '>', $p);
-$content3 = substr($content3, $p+1);
-$p = strpos($content3, '</w:body>');
-if ($p===false) exit("Tag </w:body> not found in document 1.");
-$content3 = substr($content3, 0, $p);
-$content3 .= $content4;
-
-// Open the first document
-$zip->Open($path2);
-$content2 = $zip->FileRead('word/document.xml');
-$zip->Close();
-
-// Extract the content of the first document
-$p = strpos($content2, '<w:body');
-if ($p===false) exit("Tag <w:body> not found in document 1.");
-$p = strpos($content2, '>', $p);
-$content2 = substr($content2, $p+1);
-$p = strpos($content2, '</w:body>');
-if ($p===false) exit("Tag </w:body> not found in document 1.");
-$content2 = substr($content2, 0, $p);
-$content2 .= $content3;
-
-
-// Insert into the second document
-$zip->Open($path1);
-$content1 = $zip->FileRead('word/document.xml');
-$p = strpos($content1, '</w:body>');
-if ($p===false) exit("Tag </w:body> not found in document 2.");
-$content1 = substr_replace($content1, $content2, $p, 0);
-$content1 = str_replace('${staffname}','Percy Lee',$content1);
-$content1 = str_replace('${staffcode}','123456',$content1);
-$content1 = str_replace('${staffgender}','Male',$content1);
-$content1 = str_replace('${staffidno}','H12340494944',$content1);
-$content1 = str_replace('${staffprov}','HK',$content1);
-$content1 = str_replace('${staffaddress}','香港九龍新蒲崗大有街36號華興工業大廈9樓C座',$content1);
-$zip->FileReplace('word/document.xml', $content1, TBSZIP_STRING);
-
-// Save the merge into a third file
-$zip->Flush(TBSZIP_FILE, 'merge.docx');
-	}
+    public function removeExcel(){
+        $date = date("Y/m/d");
+        $end = date("Y/m/d",strtotime("$date - 14 day"));
+        $rows = Yii::app()->db->createCommand()->select("id,file_url")->from("sev_file")->where("date_format(lcd,'%Y/%m/%d')<='$end'")->queryAll();
+        if($rows){
+            foreach ($rows as $row){
+                $path =Yii::app()->basePath."/../".$row["file_url"];
+                if (file_exists($path)){
+                    unlink($path);
+                }
+                Yii::app()->db->createCommand()->delete("sev_file","id=:id",array(":id"=>$row["id"]));
+                Yii::app()->db->createCommand()->delete("sev_file_info","file_id=:id",array(":id"=>$row["id"]));
+            }
+        }
+    }
 }
 ?>

@@ -7,6 +7,7 @@
  */
 class UploadExcelForm extends CFormModel
 {
+<<<<<<< .mine
     /* User Fields */
     public $file;
     public $file_name;
@@ -22,15 +23,50 @@ class UploadExcelForm extends CFormModel
     public $error_list=array();
     public $start_title="";
     public $cover_bool=1; //1:重複數據不覆蓋  2：覆蓋更新
+=======
+	/* User Fields */
+	public $file;
+	public $file_name;
+	public $file_type;
+	public $file_url;
+	public $year;
+	public $firm_id;
+	public $firm_name_us;
+	public $onlyArr;//需要導入的數據
+	public $onlyStaff;//需要導入的員工數據
+	public $onlyArrInfo;
+	public $amtSum;
+	public $error_list=array();
+	public $start_title="";
+	public $cover_bool=1; //1:重複數據不覆蓋  2：覆蓋更新
+>>>>>>> .theirs
 
+<<<<<<< .mine
     public $lcu; //1:重複數據不覆蓋  2：覆蓋更新
     public $city; //1:重複數據不覆蓋  2：覆蓋更新
+
+
+
+
+
+
+=======
+	public $lcu; //1:重複數據不覆蓋  2：覆蓋更新
+	public $city; //1:重複數據不覆蓋  2：覆蓋更新
+
+	protected $customer_id;
+	protected $code_name;//用於驗證客戶編號及名字是否一致
+	protected $excel_list;//導入的list
+	protected $excel_list_key;//正在導入的键值
+	protected $add_company_bool;//正在導入的键值
+>>>>>>> .theirs
 
     protected $customer_id;
     protected $code_name;//用於驗證客戶編號及名字是否一致
     protected $excel_list;//導入的list
     protected $excel_list_key;//正在導入的键值
     protected $add_company_bool;//正在導入的键值
+	protected $command;
 
     protected $year_list;//需要導入的年份
     protected $year_key_list;//需要導入的年份
@@ -115,10 +151,17 @@ class UploadExcelForm extends CFormModel
     //批量導入（欠款)
     public function loadSeveral($arr){
         set_time_limit(0);
+<<<<<<< .mine
         //init_set("memory_limit","128M");
         $this->excel_list = $arr;
         $errNum = 0;//失敗條數
         $successNum = 0;//成功條數
+=======
+        //init_set("memory_limit","128M");
+        $this->excel_list = $arr;
+	    $errNum = 0;//失敗條數
+	    $successNum = 0;//成功條數
+>>>>>>> .theirs
         $validateArr = $this->getList();
         foreach ($validateArr as $vaList){
             if(!in_array($vaList["name"],$arr["listHeader"])){
@@ -183,7 +226,7 @@ class UploadExcelForm extends CFormModel
                 Dialog::message(Yii::t('dialog','Information'), Yii::t('several','Success Num：').$successNum."<br>".Yii::t('several','Error Num：').$errNum."<br>".$error);*/
     }
 
-    public function exportExcel(){
+    public function exportExcel($url){
         $list = $this->excel_list["listBody"];
         $error_num = count($this->error_list);
         $myExcel = new MyExcelTwo();
@@ -194,7 +237,11 @@ class UploadExcelForm extends CFormModel
         $myExcel->setStartRow(6);
         $myExcel->setDataHeard($this->excel_list["listHeader"]);
         $myExcel->setDataBody($list,$this->error_list);
+<<<<<<< .mine
         $myExcel->outDownExcel("導入異常.xlsx");
+=======
+        $myExcel->saveExcel($url);
+>>>>>>> .theirs
         //die();
     }
 
@@ -510,8 +557,13 @@ class UploadExcelForm extends CFormModel
                     if($this->cover_bool == 1){
                         if (!empty($this->year_key_list)){
                             foreach ($this->year_key_list as $year){
+<<<<<<< .mine
                                 $this->command->reset();
                                 $list = $this->command->select("b.id")->from("sev_customer_firm a")
+=======
+                                $this->command->reset();
+                                $this->command->select("b.id")->from("sev_customer_firm a")
+>>>>>>> .theirs
                                     ->leftJoin("sev_customer b","a.customer_id = b.id")
                                     ->where('b.company_id=:company_id and b.customer_year=:year and a.firm_id=:firm_id',
                                         array(':company_id'=>$rows["id"],':year'=>$year,':firm_id'=>$this->firm_id))->queryRow();
@@ -635,6 +687,7 @@ class UploadExcelForm extends CFormModel
         $arr = array(1=>"重複數據不覆蓋",2=>"數據覆蓋上傳");
         return $arr;
     }
+<<<<<<< .mine
 
     public function save(){
         $file = CUploadedFile::getInstance($this,'file');
@@ -708,4 +761,79 @@ class UploadExcelForm extends CFormModel
         }
         return true;
     }
+=======
+
+    public function save(){
+        $file = CUploadedFile::getInstance($this,'file');
+        $city = Yii::app()->user->city();
+        $url = "upload/excel/".$city."/".date("YmdHis").".".$file->getExtensionName();
+        $this->file = $file->getName();
+        $this->file_name = $file->getName();
+        $this->file_type = $file->getExtensionName();
+        $this->file_url = $url;
+
+        $path =Yii::app()->basePath."/../upload/";
+        if (!file_exists($path)){
+            mkdir($path);
+        }
+        $path =Yii::app()->basePath."/../upload/excel/";
+        if (!file_exists($path)){
+            mkdir($path);
+        }
+        $path.=$city."/";
+        if (!file_exists($path)){
+            mkdir($path);
+        }
+        $file->saveAs($url);
+
+         return $this->saveSql();
+    }
+
+    protected function saveSql(){
+        $list=array("firm_id","cover_bool");
+        $postList = $_POST["UploadExcelForm"];
+
+        $loadExcel = new LoadExcel($this->file_url,false);
+        $header = $loadExcel->getListHeader();
+
+
+        $validateArr = $this->getList();
+        foreach ($validateArr as $vaList){
+            if(!in_array($vaList["name"],$header)){
+                unlink($this->file_url);
+                Dialog::message(Yii::t('dialog','Validation Message'), $vaList["name"].Yii::t("several"," Did not find"));
+                return false;
+            }
+        }
+        $this->excel_list["listHeader"] = $header;
+        $bool = $this->onlyYearList();//查詢頁頭有幾個年份
+        if (!$bool){
+            unlink($this->file_url);
+            return false;
+        }
+
+        $this->command->insert("sev_file", array(
+            "handle_name"=>"追数导入",
+            "file_name"=>$this->file_name,
+            "file_type"=>$this->file_type,
+            "file_url"=>$this->file_url,
+            "state"=>"P",
+            "lcu"=>Yii::app()->user->id,
+            //"lcd"=>date("Y-m-d H:i:s"),
+        ));
+
+        $id =Yii::app()->db->getLastInsertID();
+        foreach ($list as $item){
+            if (key_exists($item,$postList)){
+                $this->command->reset();
+                $this->command->insert("sev_file_info", array(
+                    "file_id"=>$id,
+                    "option_name"=>$item,
+                    "option_value"=>$postList[$item]
+                ));
+            }
+        }
+        return true;
+    }
+>>>>>>> .theirs
 }
