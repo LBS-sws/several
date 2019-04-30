@@ -22,11 +22,11 @@ return array(
 	// application components
 	'components'=>array(
 		'db'=>array(
-			'connectionString' => 'mysql:host=localhost;dbname=hruat',
-			'emulatePrepare' => true,
-			'username' => 'swuser',
-			'password' => 'swisher168',
-			'charset' => 'utf8',
+            'connectionString' => 'mysql:host=localhost;dbname=severaldev',
+            'emulatePrepare' => true,
+            'username' => 'root',
+            'password' => 'swisher168',
+            'charset' => 'utf8',
 		),
 		'log'=>array(
 			'class'=>'CLogRouter',
@@ -43,7 +43,7 @@ return array(
 	// using Yii::app()->params['paramName']
 	'params'=>array(
 		'systemEmail'=>'it@lbsgroup.com.hk',
-		'webroot'=>'http://http://118.89.46.224/hr-uat',
-		'envSuffix'=>'uat',
+		'webroot'=>'http://192.168.1.5/several',
+		'envSuffix'=>'dev',
 	),
 );

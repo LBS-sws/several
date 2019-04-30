@@ -4,7 +4,7 @@ class LoadExcel {
 
     private $excelList;
     private $file_url;
-	public function __construct($filePath) {
+	public function __construct($filePath,$bool = true) {
         $phpExcelPath = Yii::getPathOfAlias('ext.phpexcel');
         //spl_autoload_unregister(array('YiiBase','autoload'));
         include($phpExcelPath . DIRECTORY_SEPARATOR . 'PHPExcel.php');
@@ -40,17 +40,19 @@ class LoadExcel {
             }
             array_push($listHeader,$val);
         }
-        /**从第二行开始输出，因为excel表中第一行为列名*/
-        for($currentRow = 2;$currentRow <= $allRow;$currentRow++){
-            /**从第A列开始输出*/
-            $arr = array();
-            for($currentColumn= 0;$currentColumn<= $allColumn; $currentColumn++){
-                $val = $currentSheet->getCellByColumnAndRow($currentColumn,$currentRow)->getValue();/**ord()将字符转为十进制数*/
-                //$val = $currentSheet->getCellByColumnAndRow($currentColumn,$currentRow)->getCalculatedValue();//獲取公式后的結果
-                $val = trim($val);
-                array_push($arr,$val);
+        if($bool){
+            /**从第二行开始输出，因为excel表中第一行为列名*/
+            for($currentRow = 2;$currentRow <= $allRow;$currentRow++){
+                /**从第A列开始输出*/
+                $arr = array();
+                for($currentColumn= 0;$currentColumn<= $allColumn; $currentColumn++){
+                    $val = $currentSheet->getCellByColumnAndRow($currentColumn,$currentRow)->getValue();/**ord()将字符转为十进制数*/
+                    //$val = $currentSheet->getCellByColumnAndRow($currentColumn,$currentRow)->getCalculatedValue();//獲取公式后的結果
+                    $val = trim($val);
+                    array_push($arr,$val);
+                }
+                array_push($listBody,$arr);
             }
-            array_push($listBody,$arr);
         }
         $this->excelList =  array(
             "listHeader"=>$listHeader,
@@ -62,6 +64,10 @@ class LoadExcel {
     public function getExcelList(){
         unlink($this->file_url);
         return $this->excelList;
+    }
+
+    public function getListHeader(){
+        return $this->excelList["listHeader"];
     }
 
     private function getColumnToNum($str){

@@ -86,6 +86,7 @@ return array(
     'Search Firm'=>'LBS公司查询',
     'Search Staff'=>'负责员工查询',
     'Search Customer'=>'查询追数详情',
+    'import several info'=>'追数导入状态',
     //沈超添加结束
 );
 ?>

@@ -28,7 +28,7 @@ class CustomerController extends Controller
     {
         return array(
             array('allow',
-                'actions'=>array('import','importSave','test'),
+                'actions'=>array('import','importSave','test','test2'),
                 'expression'=>array('CustomerController','allowImport'),
             ),
             array('allow',
@@ -70,43 +70,12 @@ class CustomerController extends Controller
             Dialog::message(Yii::t('dialog','Validation Message'), $message);
             $this->render('import',array('model'=>$model,));
             return false;
-        }
-        $img = CUploadedFile::getInstance($model,'file');
-        $city = Yii::app()->user->city();
-        $path =Yii::app()->basePath."/../upload/";
-        if (!file_exists($path)){
-            mkdir($path);
-        }
-        $path =Yii::app()->basePath."/../upload/excel/";
-        if (!file_exists($path)){
-            mkdir($path);
-        }
-        $path.=$city."/";
-        if (!file_exists($path)){
-            mkdir($path);
-        }
-        if(empty($img)){
-            Dialog::message(Yii::t('dialog','Validation Message'), "文件不能为空");
-            $this->redirect(Yii::app()->createUrl('customer/import'));
-        }
-        $url = "upload/excel/".$city."/".date("YmdHis").".".$img->getExtensionName();
-        $model->file = $img->getName();
-        if ($model->file) {
-            $img->saveAs($url);
-            $loadExcel = new LoadExcel($url);
-            $list = $loadExcel->getExcelList();
-            //$loadExcel->clear();
-            $model->loadSeveral($list);
-            if(empty($model->error_list)){
-                $this->redirect(Yii::app()->createUrl('customer/import'));
-            }else{
-                $model->exportExcel();
-            }
         }else{
-            $message = CHtml::errorSummary($model);
-            Dialog::message(Yii::t('dialog','Validation Message'), $message);
-            $this->render('form',array('model'=>$model));
-            //$this->redirect(Yii::app()->createUrl('customer/import'));
+            $bool = $model->save();
+            if($bool){
+                Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
+            }
+            $this->redirect(Yii::app()->createUrl('customer/Import'));
         }
     }
 
@@ -234,9 +203,30 @@ class CustomerController extends Controller
     }
 
     public function actionTest(){
-        $model = new FunctionForm();
+/*        $model = new FunctionForm();
         $model->refreshGroupAll();
         var_dump("end");
-        Yii::app()->end();
+        Yii::app()->end();*/
+
+
+        $lcu = Yii::app()->user->id;
+        if($lcu == "shenchao"||$lcu == "test"){
+            $arr =array("sev_company","sev_customer","sev_customer_firm","sev_customer_info","sev_group","sev_remark_list","sev_staff");
+            foreach ($arr as $item){
+                Yii::app()->db->createCommand()->delete($item, 'id>0');
+                $sql = "alter table $item AUTO_INCREMENT=1";
+                Yii::app()->db->createCommand($sql)->query();
+            }
+            var_dump("reset complete");
+        }else{
+            var_dump("error User");
+        }
+    }
+
+    public function actionTest2(){
+/*        $model = new FunctionForm();
+        $model->refreshGroupAll();
+        var_dump("end");
+        Yii::app()->end();*/
     }
 }
