@@ -20,7 +20,6 @@ class MyExcelTwo {
             ->setSubject("Office 2007 XLSX Test Document")
             ->setDescription("Test document for Office 2007 XLSX, generated using PHP classes.");
         $this->objActSheet = $this->objPHPExcel->setActiveSheetIndex(0); //填充表头
-
         //$this->objPHPExcel->getActiveSheet()->getStyle('A1:H8')->getBorders()->getRight()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
         //$objPHPExcel->getActiveSheet()->freezePane('A2');
     }
@@ -125,6 +124,14 @@ class MyExcelTwo {
         $objWriter = PHPExcel_IOFactory::createWriter($this->objPHPExcel,'Excel5');
         $objWriter->save('php://output');
         //exit;
+    }
+
+    //生成excel表格
+    public function saveExcel($url){
+        $url=Yii::app()->basePath."/../$url";
+        $excel = new PHPExcel_Writer_Excel2007();
+        $excel->setPHPExcel($this->objPHPExcel);
+        $excel->save($url);
     }
 }
 ?>
