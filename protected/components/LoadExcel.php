@@ -31,6 +31,7 @@ class LoadExcel {
         $allColumn = $this->getColumnToNum($allColumn);
         /**取得一共有多少行*/
         $allRow = $currentSheet->getHighestRow();
+        //$allRow = $allRow>2010?2010:$allRow;//數量過多不顯示
         for($currentColumn= 0;$currentColumn<= $allColumn; $currentColumn++){
             $val = $currentSheet->getCellByColumnAndRow($currentColumn,1)->getValue();/**ord()将字符转为十进制数*/
             $val = trim($val);
@@ -58,11 +59,14 @@ class LoadExcel {
             "listHeader"=>$listHeader,
             "listBody"=>$listBody,
         );
+        $PHPExcel->disconnectWorksheets();
+        unset($PHPExcel);
         unset($PHPReader);
+        unset($currentSheet);
     }
 
     public function getExcelList(){
-        unlink($this->file_url);
+        //unlink($this->file_url);
         return $this->excelList;
     }
 
@@ -82,5 +86,6 @@ class LoadExcel {
         }
         return 60;
     }
+
 }
 ?>

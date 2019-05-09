@@ -39,23 +39,14 @@ class SearchCompanyList extends CListPageModel
         }
         $this->searchYear = $year;
 //GROUP BY e.customer_id
-		$sql1 = "SELECT a.*,b.sum_num,g.client_code,g.customer_name
-             FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.customer_id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.customer_id
-            ) b ON a.id = b.customer_id
+		$sql1 = "SELECT a.*,sum(b.amt) as sum_num,g.client_code,g.customer_name
+             FROM sev_customer_firm b
+            LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_company g ON g.id = a.company_id
             WHERE a.customer_year = '$year'
 			";
         $sql2 = "SELECT COUNT(*)
              FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.customer_id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.customer_id
-            ) b ON a.id = b.customer_id
             LEFT JOIN sev_company g ON g.id = a.company_id
             WHERE a.customer_year = '$year'
 			";
@@ -83,19 +74,19 @@ class SearchCompanyList extends CListPageModel
 		$sql = $sql2.$clause;
 		$this->totalRow = Yii::app()->db->createCommand($sql)->queryScalar();
 
-		$sql = $sql1.$clause.$order;
+		$sql = $sql1.$clause." GROUP BY a.id ".$order;
 		$sql = $this->sqlWithPageCriteria($sql, $this->pageNum);
 		$records = Yii::app()->db->createCommand($sql)->queryAll();
 
 		$this->attr = array();
 		if (count($records) > 0) {
 			foreach ($records as $k=>$record) {
+                //$record['sum_num'] = $this->getAmtNum($record);
 				$this->attr[] = array(
 					'id'=>$record['id'],
 					'client_code'=>$record['client_code'],
 					'customer_name'=>$record['customer_name'],
 					'customer_year'=>$record['customer_year'],
-
 					'sum_num'=>$record['sum_num'],
 					'color'=>intval($record['sum_num'])>0?"text-danger":"text-primary",
 				);
@@ -105,4 +96,10 @@ class SearchCompanyList extends CListPageModel
 		$session['searchCompany_01'] = $this->getCriteria();
 		return true;
 	}
+
+	public function getAmtNum($rs){
+        $row = Yii::app()->db->createCommand()->select("sum(amt)")->from("sev_customer_firm")
+            ->where("customer_id=:id", array(':id'=>$rs["id"]))->queryScalar();
+        return $row;
+    }
 }

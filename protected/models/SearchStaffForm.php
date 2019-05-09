@@ -66,13 +66,9 @@ class SearchStaffForm extends CFormModel
         if(!is_numeric($year)){
             $year = date("Y");
         }
-        $sql = "SELECT b.id,g.client_code,g.customer_name,b.sum_num 
-             FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.customer_id,e.firm_id,e.id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.id
-            ) b ON a.id = b.customer_id
+        $sql = "SELECT b.id,g.client_code,g.customer_name,b.amt as sum_num 
+             FROM sev_customer_firm b
+            LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_company g ON g.id = a.company_id
             WHERE a.customer_year = '$year' AND a.staff_id = ".$this->id;
         $rows = Yii::app()->db->createCommand($sql)->queryAll();

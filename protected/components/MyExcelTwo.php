@@ -129,6 +129,9 @@ class MyExcelTwo {
     //生成excel表格
     public function saveExcel($url){
         $url=Yii::app()->basePath."/../$url";
+        if (file_exists($url)){
+            unlink($url);
+        }
         $excel = new PHPExcel_Writer_Excel2007();
         $excel->setPHPExcel($this->objPHPExcel);
         $excel->save($url);

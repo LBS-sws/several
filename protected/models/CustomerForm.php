@@ -91,13 +91,29 @@ class CustomerForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, info_arr
+            array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, curr, info_arr
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,payment,lud','safe'),
-			array('remark','required'),
+			array('remark,id','required'),
 			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
+			array('id','validateId'),
             array('files, removeFileId, docMasterId, no_of_attm','safe'),
 		);
 	}
+
+	public function validateId($attribute, $params){
+        if (!empty($this->id)){
+            $firm_str = Yii::app()->user->firm();
+            $row = Yii::app()->db->createCommand()->select()->from("sev_customer_firm")
+                ->where("id=:id and firm_id in ($firm_str)", array(':id'=>$this->id))->queryRow();
+            if($row){
+                $this->customer_id = $row["customer_id"];
+            }else{
+                $message = Yii::t('several','ID'). "不存在";
+                $this->addError($attribute,$message);
+                return false;
+            }
+        }
+    }
 
 	public function validateInfoArr($attribute, $params){
 	    $infoList = &$this->info_arr;
@@ -159,6 +175,89 @@ class CustomerForm extends CFormModel
 
     protected function getGtOrEgt(){
         return array(0=>Yii::t("several","lt"),1=>Yii::t("several","eq"));
+    }
+
+    public function ajaxUpdateHtml($id){
+        $firm_str = Yii::app()->user->firm();
+        $row = Yii::app()->db->createCommand()->select("a.id as s_id,a.curr,c.client_code,c.customer_name,b.*")->from("sev_customer_firm a")
+            ->leftJoin("sev_customer b","b.id = a.customer_id")
+            ->leftJoin("sev_company c","c.id = b.company_id")
+            ->where("a.id=:id and a.firm_id in ($firm_str)", array(':id'=>$id))->queryRow();
+        if($row){
+            $html = '<div class="modal-header"><button class="close" data-dismiss="modal" type="button">×</button><h4 class="modal-title">修改</h4></div>';
+
+            $html.='<div class="modal-body">';
+            $html .=TbHtml::hiddenField("updateWindow[id]",$row["s_id"]);
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","Customer Code"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[client_code]",$row["client_code"],array('readonly'=>(true)));
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","ID"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[id]",$row["id"],array('readonly'=>(true)));
+            $html .='</div>';
+            $html.='</div>';
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","Customer Name"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-10">';
+            $html .=TbHtml::textField("updateWindow[customer_name]",$row["customer_name"],array('readonly'=>(true)));
+            $html .='</div></div>';
+
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","accountant username"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_username]",$row["acca_username"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","accountant phone"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_phone]",$row["acca_phone"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","accountant lang"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::dropDownList("updateWindow[acca_lang]",$row["acca_lang"],FunctionForm::getAllLang());
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","discount"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_discount]",$row["acca_discount"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","method"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_fun]",$row["acca_fun"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","payment"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[payment]",$row["payment"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","Curr"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-5">';
+            $html .=TbHtml::textField("updateWindow[curr]",$row["curr"]);
+            $html .='</div></div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","Update Remark"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-9">';
+            $html .=TbHtml::textArea("updateWindow[remark]","",array("rows"=>4));
+            $html .='</div></div>';
+
+            $html.='</div>';
+
+            $html.='<div class="modal-footer"><button class="btn btn-default" type="submit">提交</button></div>';
+            return array("status"=>1,"html"=>$html);
+        }else{
+            return array("status"=>0);
+        }
     }
 
     public function tBodyTdHtml($arr=array()){
@@ -236,6 +335,7 @@ class CustomerForm extends CFormModel
         $html .='<div class="col-sm-5">';
         $html .=TbHtml::textField($className."[info_arr][$firm_id][curr]",$arr["curr"],array('readonly'=>($bool)));
         $html .=TbHtml::hiddenField($className."[info_arr][$firm_id][firm_id]",$firm_id);
+        $html .=TbHtml::hiddenField($className."[info_arr][$firm_id][id]",$arr["id"]);
         $html .='</div></div>';
         if(!empty($firm_id)) {
             //追數詳情
@@ -390,6 +490,46 @@ class CustomerForm extends CFormModel
             "lcu"=>$lcu,
         ));
 	}
+
+	public function ajaxSaveData(){
+        $lcu = Yii::app()->user->id;
+        Yii::app()->db->createCommand()->update('sev_customer', array(
+            'acca_username'=>$this->acca_username,
+            'acca_phone'=>$this->acca_phone,
+            'acca_remark'=>$this->acca_remark,
+            'acca_fun'=>$this->acca_fun,
+            'acca_lang'=>$this->acca_lang,
+            'acca_discount'=>$this->acca_discount,
+            'payment'=>$this->payment
+        ), 'id=:id', array(':id'=>$this->customer_id));
+
+        if (!empty($this->curr)){
+            Yii::app()->db->createCommand()->update('sev_customer_firm', array(
+                'curr'=>$this->curr
+            ), 'id=:id', array(':id'=>$this->id));
+        }
+        //保存備註
+        Yii::app()->db->createCommand()->insert("sev_remark_list", array(
+            "firm_cus_id"=>$this->id,
+            "remark"=>$this->remark,
+            "lcu"=>$lcu,
+        ));
+        $html = '<div class="modal-header"><button class="close" data-dismiss="modal" type="button">×</button><h4 class="modal-title">'.Yii::t('dialog','Information').'</h4></div>';
+
+        $html.='<div class="modal-body">'.Yii::t('dialog','Save Done').'</div>';
+        $html.='<div class="modal-footer"><button data-dismiss="modal" class="btn btn-primary" type="button">确定</button></div>';
+        return array("status"=>1,"html"=>$html);
+	}
+
+	public function getAjaxError(){
+        $message = CHtml::errorSummary($this);
+
+        $html = '<div class="modal-header"><button class="close" data-dismiss="modal" type="button">×</button><h4 class="modal-title">'.Yii::t('dialog','Validation Message').'</h4></div>';
+
+        $html.='<div class="modal-body">'.$message.'</div>';
+        $html.='<div class="modal-footer"><button data-dismiss="modal" class="btn btn-primary" type="button">确定</button></div>';
+        return array("status"=>0,"html"=>$html);
+    }
 
 
 }

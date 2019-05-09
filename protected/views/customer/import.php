@@ -75,7 +75,7 @@ $this->pageTitle=Yii::app()->name . ' - Customer Import';
 	</div>
 </section>
 <div class="hind-bg" id="hind_bg">
-    <div class="ajaxBool">正在保存，请耐心等待&nbsp;<i class="fa fa-spinner fa-pulse"></i></div>
+    <div class="ajaxBool">正在导入，请耐心等待&nbsp;<i class="fa fa-spinner fa-pulse"></i></div>
 </div>
 <?php
 $js = "

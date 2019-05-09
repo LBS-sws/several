@@ -69,15 +69,11 @@ class SearchGroupForm extends CFormModel
             $year = date("Y");
         }
         $sql = "SELECT g.firm_name,
-SUM(b.sum_num) as arrears_money,
+SUM(b.amt) as arrears_money,
 COUNT(b.firm_id) AS occurrences_num,
-sum(case when b.sum_num>0 then 1 else 0 end ) as arrears_number
-             FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.customer_id,e.firm_id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.id
-            ) b ON a.id = b.customer_id
+sum(case when b.amt>0 then 1 else 0 end ) as arrears_number
+             FROM sev_customer_firm b
+            LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_firm g ON g.id = b.firm_id
             WHERE a.customer_year = '$year' AND a.group_id = ".$this->id." GROUP BY b.firm_id";
         $rows = Yii::app()->db->createCommand($sql)->queryAll();

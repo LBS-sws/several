@@ -41,13 +41,9 @@ class SearchFirmList extends CListPageModel
         }
         $this->searchYear = $year;
 //GROUP BY e.customer_id
-		$sql1 = "SELECT g.*,a.customer_year,SUM(b.sum_num) as collection,sum(case when b.sum_num>0 then 1 else 0 end ) as collection_num,COUNT(b.firm_id) AS occurrences_num
-             FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.firm_id,e.customer_id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.id
-            ) b ON a.id = b.customer_id
+		$sql1 = "SELECT g.*,a.customer_year,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.firm_id) AS occurrences_num
+             FROM sev_customer_firm b
+            LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_firm g ON g.id = b.firm_id
             WHERE a.customer_year = '$year' ";
         $sql2 = "SELECT COUNT(*) FROM 

@@ -78,6 +78,77 @@ echo $form->hiddenField($model,'orderType');
 <?php $this->endWidget(); ?>
 
 <?php
+//$action_url = Yii::app()->createUrl('customer/updateSave');
+$js = "
+$('.update-row a').on('click',function(event){
+    event.stopPropagation();
+});
+
+$('.update-row').on('click',function(){
+    if($('#update_window').length<=0){
+        var html ='<form class=\"modal fade form-horizontal\" id=\"update_window\"><div class=\"modal-dialog\"><div class=\"modal-content\">加載中</div></div></form>';
+        $('body').append(html);
+    }
+    var id = $(this).data('id');
+    $('#update_window').modal('show');
+    $.ajax({
+        type: 'post',
+        url: '".Yii::app()->createUrl('customer/update')."',
+        data: {id:id},
+        dataType: 'json',
+        success: function(data){
+            if(data.status==1){
+                $('#update_window .modal-content').html(data.html);
+            }else{
+                $('#update_window .modal-content').html('權限不足');
+            }
+        }
+    });
+});
+
+$('body').delegate('#update_window','submit',function(){
+    var ajaxBool = $(this).data('ajax');
+    if(ajaxBool == 1){
+        return false;
+    }else{
+        $(this).data('ajax',1);
+    }
+    var d = {};
+    var t = $('#update_window').serializeArray();
+    $.each(t, function() {
+      d[this.name] = this.value;
+    });
+    $.ajax({
+        type: 'post',
+        url: '".Yii::app()->createUrl('customer/updateSave')."',
+        data: d,
+        dataType: 'json',
+        success: function(data){
+            var trObject = $('.update-row[data-id=\"'+d['updateWindow[id]']+'\"]');
+            $('#update_window').data('ajax',0);
+            if($('#hint_window').length<=0){
+                var html ='<form class=\"modal fade\" id=\"hint_window\"><div class=\"modal-dialog\"><div class=\"modal-content\">加載中</div></div></form>';
+                $('body').append(html);
+            }
+            if(data.status==1){
+                trObject.children('td.payment').text(d['updateWindow[payment]']);
+                trObject.children('td.acca_username').text(d['updateWindow[acca_username]']);
+                trObject.children('td.acca_phone').text(d['updateWindow[acca_phone]']);
+                trObject.children('td.acca_lang').text($('#updateWindow_acca_lang>option:selected').text());
+                trObject.children('td.acca_fun').text(d['updateWindow[acca_fun]']);
+                trObject.children('td.curr').text(d['updateWindow[curr]']);
+                $('#update_window').modal('hide');
+            }
+            $('#hint_window .modal-content').html(data.html);
+            $('#hint_window').modal('show');
+            $('.update-row[data-id=\"'+d['id']+'\"]').text(11);
+            return false;
+        }
+    });
+    return false;
+});
+";
+Yii::app()->clientScript->registerScript('calcFunction',$js,CClientScript::POS_READY);
 $js = Script::genTableRowClick();
 Yii::app()->clientScript->registerScript('rowClick',$js,CClientScript::POS_READY);
 ?>
