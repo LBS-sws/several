@@ -42,7 +42,7 @@ class SearchStaffList extends CListPageModel
         }
         $this->searchYear = $year;
 //GROUP BY e.customer_id
-		$sql1 = "SELECT g.*,a.customer_year,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(a.group_id) AS occurrences_num
+		$sql1 = "SELECT g.*,a.customer_year,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.amt) AS occurrences_num
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_staff g ON g.id = a.staff_id

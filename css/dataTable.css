@@ -1,0 +1,22 @@
+/*自定义添加开始*/
+.dataTables_info{padding: 7px 0px;}
+#tableTest_paginate>.pagination{margin: 0px;}
+.dataTables_wrapper .dataTables_filter {text-align: right;  }
+.dataTables_wrapper .dataTables_paginate {text-align: right; }
+
+.sorting_asc,.sorting_desc,.sorting{position: relative;vertical-align: middle !important;}
+.sorting_asc:after,.sorting_desc:after,.sorting:after,.sorting:before{content: " ";display: inline-block;
+    position: absolute;
+    right: 1px;
+    width: 0;
+    height: 0;
+    top: 50%;
+    margin-top: -2px;
+    vertical-align: middle;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;}
+.sorting_asc:after,.sorting:before{border-bottom: 4px solid;}
+.sorting_desc:after,.sorting:after{border-top: 4px solid;}
+.sorting:before{margin-top: -5px;}
+.sorting:after{margin-top: 1px;}
+/*自定义添加结束*/

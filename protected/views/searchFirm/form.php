@@ -79,7 +79,7 @@ $this->pageTitle=Yii::app()->name . ' - Firm Form';
             <div class="form-group">
                 <?php echo $form->labelEx($model,'table_body',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-8">
-                    <table class="table table-bordered">
+                    <table class="table table-bordered" id="tableTest">
                         <thead>
                         <tr>
                             <th>&nbsp;</th>
@@ -109,8 +109,12 @@ $this->renderPartial('//site/removedialog');
 ?>
 <?php
 $js = "
+$('#tableTest').DataTable();
 ";
 Yii::app()->clientScript->registerScript('calcFunction',$js,CClientScript::POS_READY);
+Yii::app()->clientScript->registerScriptFile(Yii::app()->baseUrl . "/js/jquery.dataTables.min.js", CClientScript::POS_END);
+Yii::app()->clientScript->registerScriptFile(Yii::app()->baseUrl . "/js/jquery.dataTables.js", CClientScript::POS_END);
+Yii::app()->clientScript->registerCssFile(Yii::app()->baseUrl . "/css/dataTable.css?1.1");
 $js = Script::genDeleteData(Yii::app()->createUrl('staff/delete'));
 Yii::app()->clientScript->registerScript('deleteRecord',$js,CClientScript::POS_READY);
 

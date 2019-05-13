@@ -39,24 +39,13 @@ class SearchGroupList extends CListPageModel
         }
         $this->searchYear = $year;
 //GROUP BY e.customer_id
-		$sql1 = "SELECT a.group_id,a.customer_year,g.company_code,g.salesman_one_ts,SUM(b.amt) as arrears_money,COUNT(a.group_id) AS occurrences_num,
+		$sql1 = "SELECT a.group_id,a.customer_year,g.company_code,g.salesman_one_ts,SUM(b.amt) as arrears_money,COUNT(b.amt) AS occurrences_num,
             sum(case when b.amt>0 then 1 else 0 end ) as arrears_number
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_group g ON g.id = a.group_id
             WHERE a.customer_year = '$year' AND NOT ISNULL(a.group_id) 
 			";
-/*		$sql1 = "SELECT a.group_id,a.customer_year,g.company_code,g.salesman_one_ts,SUM(b.sum_num) as arrears_money,COUNT(a.group_id) AS occurrences_num,
-            sum(case when b.sum_num>0 then 1 else 0 end ) as arrears_number
-             FROM sev_customer a
-            LEFT JOIN (
-            SELECT SUM(f.amt_num) as sum_num,e.customer_id FROM sev_customer_firm e
-            LEFT JOIN sev_customer_info f ON f.firm_cus_id = e.id
-            GROUP BY e.id
-            ) b ON a.id = b.customer_id
-            LEFT JOIN sev_group g ON g.id = a.group_id
-            WHERE a.customer_year = '$year' AND NOT ISNULL(a.group_id)
-			";*/
         $sql2 = "SELECT COUNT(*) FROM 
             (SELECT id,group_id,customer_year  FROM sev_customer t WHERE t.customer_year = '$year' GROUP BY t.group_id ) a
             LEFT JOIN sev_group g ON g.id = a.group_id
