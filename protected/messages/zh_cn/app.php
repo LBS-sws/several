@@ -87,6 +87,7 @@ return array(
     'Search Staff'=>'负责员工查询',
     'Search Customer'=>'查询追数详情',
     'import several info'=>'追数导入状态',
+    'Batch Modifying'=>'批量修改',
     //沈超添加结束
 );
 ?>

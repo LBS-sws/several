@@ -8,6 +8,10 @@ return array(
                 'access'=>'CU02',
                 'url'=>'/customer/index',
             ),
+            'Batch Modifying'=>array(//追數列表
+                'access'=>'CU03',
+                'url'=>'/batchModify/edit',
+            ),
         ),
     ),
     'manager module'=>array(//經理模塊
