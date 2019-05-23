@@ -2,7 +2,6 @@
 
 class ClientsList extends CListPageModel
 {
-    public $searchYear;//
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -20,22 +19,10 @@ class ClientsList extends CListPageModel
 			'firm_name_us'=>Yii::t('several','Clients to firm'),
 		);
 	}
-    public function rules()
-    {
-        return array(
-            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchYear','safe',),
-        );
-    }
 	
 	public function retrieveDataByPage($pageNum=1)
 	{
 
-        if(!empty($this->searchYear)){
-            $year = str_replace("'","\'",$this->searchYear);
-        }else{
-            $year = date("Y");
-        }
-        $this->searchYear = $year;
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 		$sql1 = "select a.*,b.client_code,b.customer_name,d.staff_name,e.company_code,f.staff_name as salesman 
@@ -44,7 +31,7 @@ class ClientsList extends CListPageModel
 				LEFT JOIN sev_staff d ON a.staff_id = d.id
 				LEFT JOIN sev_group e ON a.group_id = e.id
 				LEFT JOIN sev_staff f ON a.salesman_id = f.id
-				where a.customer_year='$year' 
+				where a.id>0 
 			";
         $sql2 = "select count(*) 
 				from sev_customer a 
@@ -52,7 +39,7 @@ class ClientsList extends CListPageModel
 				LEFT JOIN sev_staff d ON a.staff_id = d.id
 				LEFT JOIN sev_group e ON a.group_id = e.id
 				LEFT JOIN sev_staff f ON a.salesman_id = f.id
-				where a.customer_year='$year' 
+				where a.id>0 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {

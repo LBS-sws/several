@@ -10,7 +10,6 @@ class SearchFirmForm extends CFormModel
 	/* User Fields */
 	public $id = 0;
     public $firm_name;
-    public $customer_year;
 
     public $occurrences_num;
 	public $collection_num;
@@ -30,7 +29,6 @@ class SearchFirmForm extends CFormModel
             'occurrences_num'=>Yii::t('several','occurrences number'),
             'collection_num'=>Yii::t('several','collection number'),
             'collection'=>Yii::t('several','For collection'),
-            'customer_year'=>Yii::t('several','Customer Year'),
             'table_body'=>Yii::t('several','arrears info'),
         );
 	}
@@ -59,15 +57,11 @@ class SearchFirmForm extends CFormModel
     }
 
     protected function returnTableBody(){
-        $year = $this->customer_year;
-        if(!is_numeric($year)){
-            $year = date("Y");
-        }
         $sql = "SELECT b.id,g.client_code,g.customer_name,b.amt as sum_num 
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_company g ON g.id = a.company_id
-            WHERE a.customer_year = '$year' AND b.firm_id = ".$this->id;
+            WHERE a.id>0 AND b.firm_id = ".$this->id;
         $rows = Yii::app()->db->createCommand($sql)->queryAll();
         if($rows){
             $this->table_body = "";

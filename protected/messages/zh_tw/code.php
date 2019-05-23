@@ -33,5 +33,11 @@ return array(
 'Region Manager'=>'區域經理',
 'Region A.Director'=>'區域副總監',
 'Region Director'=>'區域總監',
+    'status type'=>'更新進度',
+    'n'=>'未有更新',
+    'x'=>'30天未更新',
+    'y'=>'30天有更新',
+    'remark html'=>'流程信息',
+    'firm html'=>'欠款信息',
 );
 ?>

@@ -75,7 +75,7 @@ return array(
     'accountant phone'=>'聯絡人電話',
     'accountant lang'=>'聯絡人語言',
     'accountant remark'=>'聯絡人描述',
-    'method'=>'招數方法',
+    'method'=>'找數方法',
     'discount'=>'優惠折扣',
     'zh_cn'=>'中文簡體',
     'zh_tw'=>'中文繁體',

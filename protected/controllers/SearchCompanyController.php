@@ -60,10 +60,9 @@ class SearchCompanyController extends Controller
         $this->render('index',array('model'=>$model));
     }
 
-    public function actionView($index,$year='year')
+    public function actionView($index)
     {
         $model = new SearchCompanyForm('view');
-        $model->customer_year = $year;
         if (!$model->retrieveData($index)) {
             throw new CHttpException(404,'The requested page does not exist.');
         } else {

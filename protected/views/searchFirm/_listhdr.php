@@ -6,11 +6,6 @@
         ?>
     </th>
     <th>
-        <?php echo TbHtml::link($this->getLabelName('customer_year').$this->drawOrderArrow('a.customer_year'),'#',$this->createOrderLink('searchFirm-list','a.customer_year'))
-        ;
-        ?>
-    </th>
-    <th>
         <?php echo TbHtml::link($this->getLabelName('occurrences_num').$this->drawOrderArrow('occurrences_num'),'#',$this->createOrderLink('searchFirm-list','occurrences_num'))
         ;
         ?>

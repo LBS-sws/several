@@ -9,7 +9,6 @@ class FunctionForm extends CFormModel
 {
     //手動刷新集團的銷售列表
     public function refreshGroupAll(){
-        $year = date("Y");
         $rows = Yii::app()->db->createCommand()->select("id")->from("sev_group")->queryAll();
         if($rows){
             foreach ($rows as $row){
@@ -33,7 +32,7 @@ class FunctionForm extends CFormModel
                 $salesman_one_ts[$staff["salesman_id"]] = $staff["staff_name"];
             }
             if(empty($num)) {
-                $num = Yii::app()->db->createCommand()->select("COUNT(group_id) AS num")->from("sev_customer")
+                $num = Yii::app()->db->createCommand()->select("COUNT(*) AS num")->from("sev_customer")
                     ->where('group_id=:group_id',array(':group_id'=>$group_id))->queryScalar();
             }
         }

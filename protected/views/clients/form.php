@@ -109,16 +109,6 @@ $this->pageTitle=Yii::app()->name . ' - clients Form';
                     <p class="form-control-static text-warning">可追数公司的意思是：該客戶在LBS哪些公司有欠款</p>
                 </div>
             </div>
-            <?php if ($model->scenario!='new'): ?>
-            <div class="form-group">
-                <?php echo $form->labelEx($model,'customer_year',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-3">
-                    <?php echo $form->textField($model, 'customer_year',
-                        array('readonly'=>(true))
-                    ); ?>
-                </div>
-            </div>
-            <?php endif; ?>
 		</div>
 	</div>
 </section>

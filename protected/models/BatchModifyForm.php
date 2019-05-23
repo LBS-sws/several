@@ -10,7 +10,6 @@ class BatchModifyForm extends CFormModel
 	/* User Fields */
 	public $id = 0;
     public $group_id;
-    public $customer_year;
 
     public $acca_username;
     public $acca_phone;
@@ -47,7 +46,6 @@ class BatchModifyForm extends CFormModel
             'lud'=>Yii::t('several','last time'),
             'remark'=>Yii::t('several','Update Remark'),
             'payment'=>Yii::t('several','payment'),
-            'customer_year'=>Yii::t('several','Customer Year'),
         );
 	}
 
@@ -58,7 +56,7 @@ class BatchModifyForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('group_id, customer_year, remark
+            array('group_id, remark
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,payment','safe'),
 			array('group_id,remark','required'),
 			//array('cross','required'),
@@ -82,20 +80,26 @@ class BatchModifyForm extends CFormModel
 	    return $this->scenario=='view';
     }
 
-    public function getYearList(){
-        $list = UploadExcelForm::getYear();
-        $list[""]="全部";
-        return $list;
+    public function getCustomerDetail($group_id){
+        $row = Yii::app()->db->createCommand()->select("acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,payment")->from("sev_customer")
+            ->where("group_id=:group_id",array(":group_id"=>$group_id))->queryRow();
+        if($row){
+            return array("status"=>1,"data"=>$row);
+        }else{
+            return array("status"=>0,"data"=>array(
+                "acca_username"=>"",
+                "acca_phone"=>"",
+                "acca_lang"=>"",
+                "acca_discount"=>"",
+                "acca_remark"=>"",
+                "acca_fun"=>"",
+                "payment"=>"",
+            ));
+        }
     }
 	
 	public function saveData()
 	{
-	    $sql1 = "";
-	    $sql2 = "";
-	    if(!empty($this->customer_year)&&is_numeric($this->customer_year)){
-	        $sql1 = " and customer_year = '".$this->customer_year."'";
-	        $sql2 = " and a.customer_year = '".$this->customer_year."'";
-        }
         //修改客戶信息
         Yii::app()->db->createCommand()->update("sev_customer",
             array(
@@ -107,13 +111,13 @@ class BatchModifyForm extends CFormModel
                 "acca_fun"=>$this->acca_fun,
                 "payment"=>$this->payment,
             ),
-            "group_id=:group_id $sql1",array(":group_id"=>$this->group_id)
+            "group_id=:group_id",array(":group_id"=>$this->group_id)
         );
 
 	    //添加備註信息
         $rows = Yii::app()->db->createCommand()->select("b.id")->from("sev_customer_firm b")
             ->leftJoin("sev_customer a","b.customer_id = a.id")
-            ->where("a.group_id=:group_id $sql2",array(":group_id"=>$this->group_id))->queryAll();
+            ->where("a.group_id=:group_id",array(":group_id"=>$this->group_id))->queryAll();
         if($rows){
             $connection = Yii::app()->db;
             $transaction=$connection->beginTransaction();

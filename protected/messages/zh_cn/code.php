@@ -39,6 +39,12 @@ return array(
 	'Region Manager'=>'地区总经理',
 	'Region A.Director'=>'区域副总监',
 	'Region Director'=>'区域总监',
-	
+	'status type'=>'更新进度',
+	'n'=>'未有更新',
+	'x'=>'30天未更新',
+	'y'=>'30天有更新',
+	'remark html'=>'流程信息',
+	'firm html'=>'欠款信息',
+
 );
 ?>

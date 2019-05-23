@@ -12,7 +12,6 @@ class CustomerForm extends CFormModel
 	public $client_code;
 	public $customer_code;
 	public $customer_name;
-	public $customer_year;
 	public $company_code;
 	public $customer_id;
 	public $firm_id;
@@ -62,7 +61,6 @@ class CustomerForm extends CFormModel
             'client_code'=>Yii::t('several','Customer Code'),
             'customer_code'=>Yii::t('several','Customer Code'),
             'customer_name'=>Yii::t('several','Customer Name'),
-            'customer_year'=>Yii::t('several','Customer Year'),
             'company_code'=>Yii::t('several','Company Code'),
 
             'acca_username'=>Yii::t('several','accountant username'),
@@ -91,7 +89,7 @@ class CustomerForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, customer_id, remark, firm_id, client_code, customer_name, customer_year, company_code, curr, info_arr
+            array('id, customer_id, remark, firm_id, client_code, customer_name, company_code, curr, info_arr
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,payment,lud','safe'),
 			array('remark,id','required'),
 			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
@@ -196,7 +194,7 @@ class CustomerForm extends CFormModel
             $html .='</div>';
             $html .=TbHtml::label(Yii::t("several","ID"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
-            $html .=TbHtml::textField("updateWindow[id]",$row["id"],array('readonly'=>(true)));
+            $html .=TbHtml::textField("updateWindow[id]",$row["s_id"],array('readonly'=>(true)));
             $html .='</div>';
             $html.='</div>';
             $html .= '<div class="form-group">';
@@ -253,7 +251,11 @@ class CustomerForm extends CFormModel
 
             $html.='</div>';
 
-            $html.='<div class="modal-footer"><button class="btn btn-default" type="submit">提交</button></div>';
+            $html.='<div class="modal-footer">';
+            $html.='<a class="btn btn-default pull-left" type="button" href="'.Yii::app()->createUrl('customer/edit',array("index"=>$id)).'">详情</a>';
+            $html.='<button class="btn btn-default pull-left" id="btn-ago" type="button">上次内容</button>';
+            $html.='<button class="btn btn-primary" type="submit">提交</button>';
+            $html.='</div>';
             return array("status"=>1,"html"=>$html);
         }else{
             return array("status"=>0);
@@ -394,7 +396,6 @@ class CustomerForm extends CFormModel
 				$this->firm_id = $row['firm_id'];
 				$this->client_code = $row['client_code'];
                 $this->customer_name = $row['customer_name'];
-                $this->customer_year = $row['customer_year'];
                 $this->company_code = $row['company_code'];
 
                 $this->staff_id = $row['staff_id'];
@@ -452,6 +453,8 @@ class CustomerForm extends CFormModel
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
             'acca_discount'=>$this->acca_discount,
+            'lud'=>date("Y-m-d H:i:s"),
+            'status_type'=>'y',
             'payment'=>$this->payment
         ), 'id=:id', array(':id'=>$this->customer_id));
         foreach ($list as $key => $value){
@@ -500,7 +503,9 @@ class CustomerForm extends CFormModel
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
             'acca_discount'=>$this->acca_discount,
-            'payment'=>$this->payment
+            'payment'=>$this->payment,
+            'status_type'=>'y',
+            'lud'=>date("Y-m-d H:i:s")
         ), 'id=:id', array(':id'=>$this->customer_id));
 
         if (!empty($this->curr)){
@@ -518,7 +523,7 @@ class CustomerForm extends CFormModel
 
         $html.='<div class="modal-body">'.Yii::t('dialog','Save Done').'</div>';
         $html.='<div class="modal-footer"><button data-dismiss="modal" class="btn btn-primary" type="button">确定</button></div>';
-        return array("status"=>1,"html"=>$html);
+        return array("status"=>1,"html"=>$html,"remarkHtml"=>CustomerList::getRemarkHtml($this->id));
 	}
 
 	public function getAjaxError(){

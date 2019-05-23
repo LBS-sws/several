@@ -85,12 +85,6 @@ $this->pageTitle=Yii::app()->name . ' - searchCustomer Form';
                 </div>
             </div>
             <div class="form-group">
-                <?php echo $form->labelEx($model,'customer_year',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-3">
-                    <?php echo $form->textField($model, 'customer_year',
-                        array('readonly'=>(true))
-                    ); ?>
-                </div>
                 <?php echo $form->labelEx($model,'lud',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-3">
                     <?php echo $form->textField($model, 'lud',

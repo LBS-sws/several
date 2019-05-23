@@ -28,7 +28,7 @@ class BatchModifyController extends Controller
     {
         return array(
             array('allow',
-                'actions'=>array('edit','save'),
+                'actions'=>array('edit','save','ajaxGetDetail'),
                 'expression'=>array('BatchModifyController','allowReadWrite'),
             ),
 /*            array('allow',
@@ -47,7 +47,6 @@ class BatchModifyController extends Controller
     public function actionEdit()
     {
         $model = new BatchModifyForm('edit');
-        $model->customer_year = date("Y");
         $this->render('form',array('model'=>$model,));
     }
 
@@ -65,6 +64,18 @@ class BatchModifyController extends Controller
                 Dialog::message(Yii::t('dialog','Validation Message'), $message);
                 $this->render('form',array('model'=>$model,));
             }
+        }
+    }
+
+    public function actionAjaxGetDetail()
+    {
+        if(Yii::app()->request->isAjaxRequest) {//是否ajax请求
+            $model = new BatchModifyForm();
+            $group_id = $_POST['group_id'];
+            $rs = $model->getCustomerDetail($group_id);
+            echo CJSON::encode($rs);//Yii 的方法将数组处理成json数据
+        }else{
+            $this->redirect(Yii::app()->createUrl('batchModify/edit'));
         }
     }
 

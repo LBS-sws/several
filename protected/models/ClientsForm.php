@@ -16,7 +16,6 @@ class ClientsForm extends CFormModel
 	public $group_type=0;
 	public $firm_name_id;
 	public $firm_name_us;
-	public $customer_year;
 
 	public $client_code;
 	public $customer_name;
@@ -42,7 +41,6 @@ class ClientsForm extends CFormModel
             'salesman_id'=>Yii::t('several','salesman'),
             'salesman'=>Yii::t('several','salesman'),
             'firm_name_id'=>Yii::t('several','Clients to firm'),
-            'customer_year'=>Yii::t('several','Customer Year'),
         );
 	}
 
@@ -53,7 +51,7 @@ class ClientsForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, company_id, staff_id, salesman_id, group_id, customer_year, firm_name_id, firm_name_us,
+            array('id, company_id, staff_id, salesman_id, group_id, firm_name_id, firm_name_us,
              client_code, customer_name, company_code','safe'),
 			array('company_id','required','on'=>'new'),
 			array('salesman_id,staff_id','required'),
@@ -119,12 +117,11 @@ class ClientsForm extends CFormModel
                 $message = Yii::t('several','Customer Name'). Yii::t('several',' does not exist');
                 $this->addError($attribute,$message);
             }else{
-                $year = date("Y");
                 $rows = Yii::app()->db->createCommand()->select("id")->from("sev_customer")
-                    ->where('company_id=:company_id and customer_year=:year and id!=:id',
-                        array(':company_id'=>$this->company_id,':year'=>$year,':id'=>$this->id))->queryRow();
+                    ->where('company_id=:company_id and id!=:id',
+                        array(':company_id'=>$this->company_id,':id'=>$this->id))->queryRow();
                 if($rows){
-                    $message = "該客戶在 $year 已存在，不可重複添加。重複ID：".$rows["id"];
+                    $message = "該客戶在已存在，不可重複添加。重複ID：".$rows["id"];
                     $this->addError($attribute,$message);
                 }
             }
@@ -212,7 +209,6 @@ class ClientsForm extends CFormModel
 				$this->staff_id = $row['staff_id'];
                 $this->salesman_id = $row['salesman_id'];
                 $this->group_id = $row['group_id'];
-                $this->customer_year = $row['customer_year'];
                 $this->client_code = $row['client_code'];
                 $this->customer_name = $row['customer_name'];
                 $this->company_code = $row['company_code'];
@@ -241,6 +237,7 @@ class ClientsForm extends CFormModel
 	protected function saveStaff(&$connection)
 	{
 		$sql = '';
+        $lcd = date("Y-m-d H:i:s");
         $city = Yii::app()->user->city();
         $city_allow = Yii::app()->user->city_allow();
         $uid = Yii::app()->user->id;
@@ -250,9 +247,9 @@ class ClientsForm extends CFormModel
 				break;
 			case 'new':
 				$sql = "insert into sev_customer(
-							company_id, staff_id, salesman_id, group_id, group_type, customer_year, firm_name_id, firm_name_us, lcu,lcd
+							company_id, staff_id, salesman_id, group_id, group_type, firm_name_id, firm_name_us, lcu,lcd,lud
 						) values (
-							:company_id, :staff_id, :salesman_id, :group_id, :group_type, :customer_year, :firm_name_id, :firm_name_us, :lcu,:lcd
+							:company_id, :staff_id, :salesman_id, :group_id, :group_type, :firm_name_id, :firm_name_us, :lcu,:lcd,:lud
 						)";
 				break;
 			case 'edit':
@@ -267,7 +264,7 @@ class ClientsForm extends CFormModel
 						where id = :id
 						";
 				break;
-		}//client_code, customer_name, company_code, company_id, staff_id, group_id, customer_year
+		}//client_code, customer_name, company_code, company_id, staff_id, group_id
 
 		$command=$connection->createCommand($sql);
 		if (strpos($sql,':id')!==false)
@@ -282,10 +279,6 @@ class ClientsForm extends CFormModel
 			$command->bindParam(':group_id',$this->group_id,PDO::PARAM_INT);
 		if (strpos($sql,':group_type')!==false)
 			$command->bindParam(':group_type',$this->group_type,PDO::PARAM_INT);
-		if (strpos($sql,':customer_year')!==false){
-		    $year = date("Y");
-            $command->bindParam(':customer_year',$year,PDO::PARAM_INT);
-        }
 
 		if (strpos($sql,':firm_name_id')!==false){
             $this->firm_name_id = implode(",",$this->firm_name_id);
@@ -299,8 +292,10 @@ class ClientsForm extends CFormModel
 		if (strpos($sql,':lcu')!==false)
 			$command->bindParam(':lcu',$uid,PDO::PARAM_STR);
 		if (strpos($sql,':lcd')!==false){
-            $lcd = date("Y-m-d H:i:s");
             $command->bindParam(':lcd',$lcd,PDO::PARAM_STR);
+        }
+		if (strpos($sql,':lud')!==false){
+            $command->bindParam(':lud',$lcd,PDO::PARAM_STR);
         }
 
 		$command->execute();

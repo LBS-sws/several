@@ -1,6 +1,7 @@
 <?php
 class TestCommand extends CConsoleCommand {
     public function run() {
+        $this->resetStatusType();//更新追數狀態
         $cr = Yii::app()->db->createCommand();
         $row = $cr->select("id")->from("sev_file")->where("state='I'")->queryRow();
         if($row){ //如果有進行中的任務，不執行
@@ -53,6 +54,18 @@ class TestCommand extends CConsoleCommand {
                 Yii::app()->db->createCommand()->delete("sev_file","id=:id",array(":id"=>$row["id"]));
                 Yii::app()->db->createCommand()->delete("sev_file_info","file_id=:id",array(":id"=>$row["id"]));
             }
+        }
+    }
+
+    public function resetStatusType(){ //檢查員工更新欠款進度
+        $time = intval(date("His"));
+        if($time>=0&&$time<=59){
+            $sql = "update sev_customer set status_type='n' where lud=lcd";//未更新
+            Yii::app()->db->createCommand($sql)->execute();
+            $sql = "update sev_customer set status_type='y' where time_to_sec(timediff(lud,lcd)) between 1 AND 2592000";//30天以內有更新
+            Yii::app()->db->createCommand($sql)->execute();
+            $sql = "update sev_customer set status_type='x' where time_to_sec(timediff(lud,lcd))>2592000";//30天以外未更新
+            Yii::app()->db->createCommand($sql)->execute();
         }
     }
 }

@@ -25,11 +25,6 @@
 			;
 		?>
 	</th>
-    <th>
-        <?php echo TbHtml::link($this->getLabelName('customer_year').$this->drawOrderArrow('b.customer_year'),'#',$this->createOrderLink('searchCustomer-list','b.customer_year'))
-        ;
-        ?>
-    </th>
 	<th>
 		<?php echo TbHtml::link($this->getLabelName('curr').$this->drawOrderArrow('a.curr'),'#',$this->createOrderLink('searchCustomer-list','a.curr'))
 			;

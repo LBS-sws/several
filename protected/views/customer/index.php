@@ -10,7 +10,7 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
 )); ?>
 <style>
     .table-responsive>div:last-child{overflow-x: auto;width: 100%;}
-    #tblData{width: 1700px;}
+    #tblData{width: 2500px;}
 </style>
 
 <section class="content-header">
@@ -29,7 +29,7 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
 <section class="content">
     <div class="box"><div class="box-body">
             <div class="btn-group" role="group">
-                <div style="padding: 5px;" class="text-danger">追數流程：經理先建立客戶關係 -> 會計記錄追數欠款情況（本頁面）</div>
+                <div style="padding: 5px;" class="text-danger">追數流程：經理先建立客戶關係 -> 會計記錄追數欠款情況（本頁面）<br>注意：欠款信息只顯示欠款月份</div>
                 <?php
                 //var_dump(Yii::app()->session['rw_func']);
 /*                if (Yii::app()->user->validRWFunction('CU02'))
@@ -44,16 +44,11 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
         'firm_name',
         'client_code',
         'customer_name',
-        'customer_year',
         'company_code',
         'curr',
     );
     $search_add_html="";
     $modelName = get_class($model);
-    $yearList = UploadExcelForm::getYear();
-    $yearList[""]="全部";
-    $search_add_html .= TbHtml::dropDownList($modelName.'[searchYear]',$model->searchYear,$yearList,
-        array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
     $search_add_html .= TbHtml::dropDownList($modelName.'[searchArrears]',$model->searchArrears,$model->getArrearsList(),
         array('size'=>15,'placeholder'=>Yii::t('misc','Start Date'),"class"=>"form-control","id"=>"start_time"));
 
@@ -118,6 +113,7 @@ $('body').delegate('#update_window','submit',function(){
     $.each(t, function() {
       d[this.name] = this.value;
     });
+    localStorage.fromAgo = JSON.stringify(d);
     $.ajax({
         type: 'post',
         url: '".Yii::app()->createUrl('customer/updateSave')."',
@@ -137,6 +133,8 @@ $('body').delegate('#update_window','submit',function(){
                 trObject.children('td.acca_lang').text($('#updateWindow_acca_lang>option:selected').text());
                 trObject.children('td.acca_fun').text(d['updateWindow[acca_fun]']);
                 trObject.children('td.curr').text(d['updateWindow[curr]']);
+                trObject.children('td.status_type').text('".Yii::t("code","y")."');
+                trObject.children('td.remarkHtml').html(data.remarkHtml);
                 $('#update_window').modal('hide');
             }
             $('#hint_window .modal-content').html(data.html);
@@ -147,6 +145,22 @@ $('body').delegate('#update_window','submit',function(){
     });
     return false;
 });
+
+$('body').delegate('#btn-ago','click',function(){
+    var fromAge = localStorage.fromAgo;
+    if(fromAge != '' && fromAge != undefined){
+        fromAge = JSON.parse(fromAge);
+        $('#updateWindow_payment').val(fromAge['updateWindow[payment]']);
+        $('#updateWindow_acca_username').val(fromAge['updateWindow[acca_username]']);
+        $('#updateWindow_acca_phone').val(fromAge['updateWindow[acca_phone]']);
+        $('#updateWindow_acca_lang').val(fromAge['updateWindow[acca_lang]']);
+        $('#updateWindow_acca_fun').val(fromAge['updateWindow[acca_fun]']);
+        $('#updateWindow_curr').val(fromAge['updateWindow[curr]']);
+        $('#updateWindow_acca_discount').val(fromAge['updateWindow[acca_discount]']);
+        $('#updateWindow_remark').val(fromAge['updateWindow[remark]']);
+    }
+});
+
 ";
 Yii::app()->clientScript->registerScript('calcFunction',$js,CClientScript::POS_READY);
 $js = Script::genTableRowClick();

@@ -10,7 +10,6 @@ class SearchGroupForm extends CFormModel
 	/* User Fields */
 	public $id = 0;
     public $company_code;
-    public $customer_year;
     public $assign_id;
 	public $salesman_one_ts;
 	public $table_body;
@@ -31,7 +30,6 @@ class SearchGroupForm extends CFormModel
             'assign_id'=>Yii::t('several','assign staff'),
             'arrears_number'=>Yii::t('several','arrears number'),
             'arrears_money'=>Yii::t('several','arrears money'),
-            'customer_year'=>Yii::t('several','Customer Year'),
             'salesman_one_ts'=>Yii::t('several','salesman one'),
             'balance'=>Yii::t('several','Balance details'),
             'summary'=>Yii::t('several','Balance summary'),
@@ -64,10 +62,6 @@ class SearchGroupForm extends CFormModel
     }
 
     protected function returnTableBody(){
-        $year = $this->customer_year;
-        if(!is_numeric($year)){
-            $year = date("Y");
-        }
         $sql = "SELECT g.firm_name,
 SUM(b.amt) as arrears_money,
 COUNT(b.firm_id) AS occurrences_num,
@@ -75,7 +69,7 @@ sum(case when b.amt>0 then 1 else 0 end ) as arrears_number
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_firm g ON g.id = b.firm_id
-            WHERE a.customer_year = '$year' AND a.group_id = ".$this->id." GROUP BY b.firm_id";
+            WHERE a.id>0 AND a.group_id = ".$this->id." GROUP BY b.firm_id";
         $rows = Yii::app()->db->createCommand($sql)->queryAll();
         if($rows){
             $this->table_body = "";

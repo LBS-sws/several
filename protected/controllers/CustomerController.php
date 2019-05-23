@@ -28,7 +28,7 @@ class CustomerController extends Controller
     {
         return array(
             array('allow',
-                'actions'=>array('import','importSave','test'),
+                'actions'=>array('import','importSave','test','test2'),
                 'expression'=>array('CustomerController','allowImport'),
             ),
             array('allow',
@@ -235,8 +235,18 @@ class CustomerController extends Controller
         $model->refreshGroupAll();
         var_dump("end");
         Yii::app()->end();*/
-        $test = new TestLoad();
-        $test->run();
+var_dump("start");
+        //FunctionForm::refreshGroupAll();//刷新集團編號的次數及銷售員
+
+        $time = intval(date("His"));
+        var_dump($time);
+        $sql = "update sev_customer set status_type='n' where lud=lcd";//未更新
+        Yii::app()->db->createCommand($sql)->execute();
+        $sql = "update sev_customer set status_type='y' where time_to_sec(timediff(lud,lcd)) between 1 AND 2592000";//30天以內有更新
+        Yii::app()->db->createCommand($sql)->execute();
+        $sql = "update sev_customer set status_type='x' where time_to_sec(timediff(lud,lcd))>2592000";//30天以外未更新
+        Yii::app()->db->createCommand($sql)->execute();
+        die();
     }
 
     public function actionUpdate(){

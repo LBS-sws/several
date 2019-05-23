@@ -3,7 +3,6 @@
 
 class SearchStaffList extends CListPageModel
 {
-    public $searchYear;//
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -19,38 +18,24 @@ class SearchStaffList extends CListPageModel
             'occurrences_num'=>Yii::t('several','occurrences number'),
             'collection_num'=>Yii::t('several','collection number'),
             'collection'=>Yii::t('several','For collection'),
-            'customer_year'=>Yii::t('several','Customer Year'),
 			//'salesman_one_ts'=>Yii::t('several','salesman one'),
 		);
 	}
-    public function rules()
-    {
-        return array(
-            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchYear','safe',),
-        );
-    }
 	
 	public function retrieveDataByPage($pageNum=1)
 	{
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
-        if(!empty($this->searchYear)){
-            $year = str_replace("'","\'",$this->searchYear);
-        }
-        if(empty($year)||!is_numeric($year)){
-            $year = date("Y");
-        }
-        $this->searchYear = $year;
 //GROUP BY e.customer_id
-		$sql1 = "SELECT g.*,a.customer_year,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.amt) AS occurrences_num
+		$sql1 = "SELECT g.*,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.amt) AS occurrences_num
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_staff g ON g.id = a.staff_id
-            WHERE a.customer_year = '$year' AND NOT ISNULL(a.staff_id) ";
+            WHERE a.id>0 AND NOT ISNULL(a.staff_id) ";
         $sql2 = "SELECT COUNT(*) FROM 
-            (SELECT id,staff_id,customer_year  FROM sev_customer t WHERE t.customer_year = '$year' GROUP BY t.staff_id ) a
+            (SELECT id,staff_id  FROM sev_customer t WHERE t.id >0 GROUP BY t.staff_id ) a
             LEFT JOIN sev_staff g ON g.id = a.staff_id
-            WHERE a.customer_year = '$year' AND NOT ISNULL(a.staff_id) 
+            WHERE g.id>0 AND NOT ISNULL(a.staff_id) 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
@@ -89,7 +74,6 @@ class SearchStaffList extends CListPageModel
 					'staff_phone'=>$record['staff_phone'],
 					'occurrences_num'=>$record['occurrences_num'],
 					'collection_num'=>$record['collection_num'],
-					'customer_year'=>$record['customer_year'],
 
 					'collection'=>$record['collection'],
 					'color'=>intval($record['collection'])>0?"text-danger":"text-primary",

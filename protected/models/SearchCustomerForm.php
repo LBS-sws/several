@@ -12,7 +12,6 @@ class SearchCustomerForm extends CFormModel
     public $client_code;
     public $customer_code;
     public $customer_name;
-    public $customer_year;
     public $company_code;
     public $customer_id;
     public $firm_id;
@@ -49,7 +48,6 @@ class SearchCustomerForm extends CFormModel
             'client_code'=>Yii::t('several','Customer Code'),
             'customer_code'=>Yii::t('several','Customer Code'),
             'customer_name'=>Yii::t('several','Customer Name'),
-            'customer_year'=>Yii::t('several','Customer Year'),
             'company_code'=>Yii::t('several','Company Code'),
 
             'acca_username'=>Yii::t('several','accountant username'),
@@ -96,7 +94,6 @@ class SearchCustomerForm extends CFormModel
                 $this->client_code = $row['client_code'];
                 $this->curr = $row['curr'];
                 $this->customer_name = $row['customer_name'];
-                $this->customer_year = $row['customer_year'];
                 $this->company_code = $row['company_code'];
 
                 $this->staff_id = $row['staff_id'];

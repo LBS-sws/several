@@ -54,7 +54,7 @@ class GroupList extends CListPageModel
 			$order .= " order by ".$this->orderField." ";
 			if ($this->orderType=='D') $order .= "desc ";
 		}else{
-            $order .= " order by id desc ";
+            $order .= " order by a.company_code asc ";
         }
 
 		$sql = $sql2.$clause;

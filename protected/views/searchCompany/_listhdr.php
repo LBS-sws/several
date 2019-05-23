@@ -10,11 +10,6 @@
         ;
         ?>
     </th>
-	<th>
-		<?php echo TbHtml::link($this->getLabelName('customer_year').$this->drawOrderArrow('a.customer_year'),'#',$this->createOrderLink('searchCompany-list','a.customer_year'))
-			;
-		?>
-	</th>
     <th>
         <?php echo TbHtml::link($this->getLabelName('sum_num').$this->drawOrderArrow('sum_num'),'#',$this->createOrderLink('searchCompany-list','sum_num'))
         ;

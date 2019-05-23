@@ -25,16 +25,14 @@
 			;
 		?>
 	</th>
-    <th>
-        <?php echo TbHtml::link($this->getLabelName('customer_year').$this->drawOrderArrow('b.customer_year'),'#',$this->createOrderLink('customer-list','b.customer_year'))
-        ;
-        ?>
-    </th>
 	<th>
 		<?php echo TbHtml::link($this->getLabelName('curr').$this->drawOrderArrow('a.curr'),'#',$this->createOrderLink('customer-list','a.curr'))
 			;
 		?>
 	</th>
+    <th width="200px" class="text-primary">
+        <?php echo $this->getLabelName('firmHtml');?>
+    </th>
 	<th>
 		<?php echo TbHtml::link($this->getLabelName('amt').$this->drawOrderArrow('a.amt'),'#',$this->createOrderLink('customer-list','a.amt'))
 			;
@@ -69,6 +67,14 @@
 	</th>
 	<th>
 		<?php echo TbHtml::link($this->getLabelName('acca_phone').$this->drawOrderArrow('b.acca_phone'),'#',$this->createOrderLink('customer-list','b.acca_phone'))
+			;
+		?>
+	</th>
+	<th width="500px" class="text-primary">
+        <?php echo $this->getLabelName('remarkHtml');?>
+	</th>
+	<th>
+		<?php echo TbHtml::link($this->getLabelName('status_type').$this->drawOrderArrow('b.status_type'),'#',$this->createOrderLink('customer-list','b.status_type'))
 			;
 		?>
 	</th>
