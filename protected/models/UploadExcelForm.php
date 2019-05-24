@@ -375,7 +375,7 @@ class UploadExcelForm extends CFormModel
                 }*/
                 //$this->amtSum+=floatval($value);
                 $this->only_list["amtSum"]+=floatval($value);
-                $this->only_list["list"][]=array(
+                $this->only_list["list"][$monthKey]=array(
                     "amt_gt"=>$amt_gt,
                     "amt_name"=>$monthKey,
                     "amt_num"=>$value,

@@ -10,7 +10,9 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
 )); ?>
 <style>
     .table-responsive>div:last-child{overflow-x: auto;width: 100%;}
-    #tblData{width: 2500px;}
+    #tblData{table-layout:fixed;}
+    #tblData thead>th{min-width: 30px;}
+    #tblData td{word-break: break-all;}
 </style>
 
 <section class="content-header">
