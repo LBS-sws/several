@@ -100,6 +100,7 @@ return array(
     'is group'=>'集团客户',
     'payment'=>'付款期限',
     'clerk'=>'会计文员',
+    'export Type'=>'导出类型',
 
 );
 ?>

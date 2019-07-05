@@ -9,36 +9,70 @@ class TestCommand extends CConsoleCommand {
         }
         $this->removeExcel();//刪除過期的任務
         $cr->reset();
-        $row = $cr->select("file_url,id,lcu")->from("sev_file")->where("state='P'")->queryRow();
+        $row = $cr->select("file_url,id,lcu,handle_name")->from("sev_file")->where("state='P'")->queryRow();
         if($row){
-            echo "start\n";
-            $model = new UploadExcelForm();
             $cr->reset();
             $cr->update("sev_file", array("state"=>"I"),"id=:id",array(":id"=>$row["id"]));
-            $model->lcu = $row["lcu"];
-            $attr = $model->attributeLabels();
-            $cr->reset();
-            $rows = $cr->select("option_name,option_value")->from("sev_file_info")->where("file_id=:id",array(":id"=>$row["id"]))->queryAll();
-            foreach ($rows as &$item){
-                if (key_exists($item["option_name"],$attr)){
-                    $model[$item["option_name"]] = $item["option_value"];
-                }
+            switch ($row["handle_name"]){
+                case "追数导入":
+                    $this->importExcel($cr,$row);
+                    break;
+                case "导出集团客户":
+                    $this->downAllGroup($cr,$row);
+                    break;
+                case "导出非集团客户":
+                    $this->downNotGroup($cr,$row);
+                    break;
+
             }
-            $model->validateFirmId(1,2);
-            $loadExcel = new LoadExcel($row["file_url"]);
-            $list = $loadExcel->getExcelList();
-            unset($loadExcel);
-            //$loadExcel->clear();
-            $model->loadSeveral($list);
-            if(empty($model->error_list)){
-                Yii::app()->db->createCommand()->update("sev_file", array("state"=>"C","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
-            }else{
-                Yii::app()->db->createCommand()->update("sev_file", array("state"=>"F","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
-                $model->exportExcel($row["file_url"]);
-            }
-            echo "end\n";
         }
         die();
+    }
+
+    //导出非集团客户
+    protected function downNotGroup($cr,$row){
+        echo "not Group\n";
+        $cr->update("sev_file", array("state"=>"S"),"id=:id",array(":id"=>$row["id"]));
+    }
+
+    //导出集团客户
+    protected function downAllGroup($cr,$row){
+        echo "all Group\n";
+        $model = new DownAllForm();
+        $model->setGroupExcl();
+        $url = "upload/excel/HK/".date("YmdHis").".xlsx";
+        $model->saveExcel($url);
+        $cr->update("sev_file", array("state"=>"S","file_name"=>"集团客户.xlsx","file_url"=>$url,"file_type"=>"xlsx","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+        Yii::app()->end();
+        spl_autoload_register(array('YiiBase','autoload'));
+    }
+
+    //導入excel
+    protected function importExcel($cr,$row){
+        echo "import\n";
+        $model = new UploadExcelForm();
+        $model->lcu = $row["lcu"];
+        $attr = $model->attributeLabels();
+        $cr->reset();
+        $rows = $cr->select("option_name,option_value")->from("sev_file_info")->where("file_id=:id",array(":id"=>$row["id"]))->queryAll();
+        foreach ($rows as &$item){
+            if (key_exists($item["option_name"],$attr)){
+                $model[$item["option_name"]] = $item["option_value"];
+            }
+        }
+        $model->validateFirmId(1,2);
+        $loadExcel = new LoadExcel($row["file_url"]);
+        $list = $loadExcel->getExcelList();
+        unset($loadExcel);
+        //$loadExcel->clear();
+        $model->loadSeveral($list);
+        if(empty($model->error_list)){
+            Yii::app()->db->createCommand()->update("sev_file", array("state"=>"C","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+        }else{
+            Yii::app()->db->createCommand()->update("sev_file", array("state"=>"F","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+            $model->exportExcel($row["file_url"]);
+        }
+        echo "end\n";
     }
 
     public function removeExcel(){

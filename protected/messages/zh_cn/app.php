@@ -87,7 +87,11 @@ return array(
     'Search Staff'=>'负责员工查询',
     'Search Customer'=>'查询追数详情',
     'import several info'=>'追数导入状态',
-    'Batch Modifying'=>'批量修改',
+    'Batch Modifying'=>'集团批量修改',
+    'Batch Modifying customer'=>'客户批量修改',
+    'export only group'=>'导出集团客户',
+    'export not group'=>'导出非集团客户',
+    'export several'=>'导出会计追数',
     //沈超添加结束
 );
 ?>

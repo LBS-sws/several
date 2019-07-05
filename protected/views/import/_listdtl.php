@@ -8,7 +8,7 @@
     <td><?php echo $this->record['lud']; ?></td>
     <td>
         <?php
-        if ($this->record['status']=='F'){
+        if ($this->record['status']=='F'||$this->record['status']=='S'){
             $dlnk = Yii::app()->createUrl('import/view',array('index'=>$this->record['id']));
             echo TbHtml::Button('<span class="fa fa-download"></span> '.Yii::t('misc','Download'), array('submit'=>$dlnk,'size' => TbHtml::BUTTON_SIZE_SMALL));
         }else{

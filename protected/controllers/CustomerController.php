@@ -50,7 +50,7 @@ class CustomerController extends Controller
     }
 
     public static function allowImport() {
-        return Yii::app()->user->validRWFunction('MR01');
+        return Yii::app()->user->validRWFunction('BR01');
     }
 
     public static function allowReadWrite() {
@@ -80,7 +80,8 @@ class CustomerController extends Controller
         }else{
             $bool = $model->save();
             if($bool){
-                Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
+                Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Report submitted. Please go to Report Manager to retrieve the output.'));
+                //Dialog::message(Yii::t('dialog','Information'), Yii::t('dialog','Save Done'));
             }
             $this->redirect(Yii::app()->createUrl('customer/Import'));
         }
@@ -237,6 +238,7 @@ class CustomerController extends Controller
         Yii::app()->end();*/
 var_dump("start");
         //FunctionForm::refreshGroupAll();//刷新集團編號的次數及銷售員
+
 
         $time = intval(date("His"));
         var_dump($time);

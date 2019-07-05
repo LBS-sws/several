@@ -91,7 +91,11 @@ return array(
     'Search Staff'=>'指派員工查詢',
     'Search Customer'=>'查詢追數詳情',
     'import several info'=>'追數導入狀態',
-    'Batch Modifying'=>'批量修改',
+    'Batch Modifying'=>'集團批量修改',
+    'Batch Modifying customer'=>'客戶批量修改',
+    'export only group'=>'導出集團客戶',
+    'export not group'=>'導出非集團客戶',
+    'export several'=>'導出會計追數',
     //沈超添加结束
 );
 ?>

@@ -99,5 +99,6 @@ return array(
     'is group'=>'集團客戶',
     'payment'=>'付款期限',
     'clerk'=>'會計文員',
+    'export Type'=>'導出類型',
 );
 ?>

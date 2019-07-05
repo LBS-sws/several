@@ -17,18 +17,18 @@ return array(
     'manager module'=>array(//經理模塊
         'access'=>'MR',
         'items'=>array(
-            'import several'=>array(//導入追數
+/*            'import several'=>array(//導入追數
                 'access'=>'MR01',
                 'url'=>'/customer/import',
-            ),
+            ),*/
             'New After Clients'=>array(
                 'access'=>'MR02',
                 'url'=>'/clients/index',
             ),
-            'import several info'=>array(
+/*            'import several info'=>array(
                 'access'=>'MR03',
                 'url'=>'/import/index',
-            ),
+            ),*/
         ),
     ),
 	'Security'=>array(//保安
@@ -84,6 +84,23 @@ return array(
             'Search Customer'=>array(//查询追数详情
                 'access'=>'BC05',
                 'url'=>'/searchCustomer/index',
+            ),
+        ),
+    ),
+    'Report'=>array(//報表
+        'access'=>'BR',
+        'items'=>array(
+            'import several'=>array(//導入追數
+                'access'=>'BR01',
+                'url'=>'/customer/import',
+            ),
+            'export several'=>array(//導出追數
+                'access'=>'BR02',
+                'url'=>'/import/edit',
+            ),
+            'Report Manager'=>array(//報表管理員
+                'access'=>'BR03',
+                'url'=>'/import/index',
             ),
         ),
     ),
