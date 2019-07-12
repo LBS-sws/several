@@ -30,6 +30,9 @@ class CustomerForm extends CFormModel
 	public $lud;
 	public $payment;
 
+	public $on_off;
+	public $pay_type;
+
 
 	public $info_arr=array();
 	protected $validateMonth;
@@ -74,6 +77,9 @@ class CustomerForm extends CFormModel
             'phone'=>Yii::t('several','phone'),
             'lud'=>Yii::t('several','last time'),
 
+            'on_off'=>Yii::t('several','on off'),
+            'pay_type'=>Yii::t('several','pay type'),
+
             'curr'=>Yii::t('several','Curr'),
             'amt'=>Yii::t('several','Amt'),
             'remark'=>Yii::t('several','Update Remark'),
@@ -89,7 +95,7 @@ class CustomerForm extends CFormModel
 	{
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
-            array('id, customer_id, remark, firm_id, client_code, customer_name, company_code, curr, info_arr
+            array('id, customer_id, remark, firm_id, client_code, customer_name, company_code, curr, info_arr, pay_type, on_off
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,payment,lud','safe'),
 			array('remark,id','required'),
 			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
@@ -242,6 +248,17 @@ class CustomerForm extends CFormModel
             $html .='<div class="col-sm-5">';
             $html .=TbHtml::textField("updateWindow[curr]",$row["curr"]);
             $html .='</div></div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","on off"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::dropDownList("updateWindow[acca_fun]",$row["on_off"],FunctionForm::getServiceList());
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","pay type"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::dropDownList("updateWindow[pay_type]",$row["pay_type"],FunctionForm::getPayList());
+            $html .='</div>';
+            $html.='</div>';
 
             $html .= '<div class="form-group">';
             $html .=TbHtml::label(Yii::t("several","Update Remark"),"",array('class'=>"col-sm-2 control-label"));
@@ -408,6 +425,8 @@ class CustomerForm extends CFormModel
                 $this->acca_discount = $row['acca_discount'];
                 $this->lud = $row['lud'];
                 $this->payment = $row['payment'];
+                $this->on_off = $row['on_off'];
+                $this->pay_type = $row['pay_type'];
 
                 $this->no_of_attm['cust'] = $row['custdoc'];
 /*                $this->curr = $row['curr'];
@@ -453,6 +472,8 @@ class CustomerForm extends CFormModel
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
             'acca_discount'=>$this->acca_discount,
+            'on_off'=>$this->on_off,
+            'pay_type'=>$this->pay_type,
             'lud'=>date("Y-m-d H:i:s"),
             'status_type'=>'y',
             'payment'=>$this->payment
@@ -504,6 +525,8 @@ class CustomerForm extends CFormModel
             'acca_lang'=>$this->acca_lang,
             'acca_discount'=>$this->acca_discount,
             'payment'=>$this->payment,
+            'on_off'=>$this->on_off,
+            'pay_type'=>$this->pay_type,
             'status_type'=>'y',
             'lud'=>date("Y-m-d H:i:s")
         ), 'id=:id', array(':id'=>$this->customer_id));
@@ -535,6 +558,5 @@ class CustomerForm extends CFormModel
         $html.='<div class="modal-footer"><button data-dismiss="modal" class="btn btn-primary" type="button">确定</button></div>';
         return array("status"=>0,"html"=>$html);
     }
-
 
 }

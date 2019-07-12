@@ -9,7 +9,7 @@ class TestCommand extends CConsoleCommand {
         }
         $this->removeExcel();//刪除過期的任務
         $cr->reset();
-        $row = $cr->select("file_url,id,lcu,handle_name")->from("sev_file")->where("state='P'")->queryRow();
+        $row = $cr->select("file_url,id,lcu,lcd,handle_name")->from("sev_file")->where("state='P'")->queryRow();
         if($row){
             $cr->reset();
             $cr->update("sev_file", array("state"=>"I"),"id=:id",array(":id"=>$row["id"]));
@@ -32,14 +32,20 @@ class TestCommand extends CConsoleCommand {
     //导出非集团客户
     protected function downNotGroup($cr,$row){
         echo "not Group\n";
-        $cr->update("sev_file", array("state"=>"S"),"id=:id",array(":id"=>$row["id"]));
+        $model = new DownNotForm();
+        $model->setNotGroupExcel($row["lcd"]);
+        $url = "upload/excel/HK/".date("YmdHis").".xlsx";
+        $model->saveExcel($url);
+        $cr->update("sev_file", array("state"=>"S","file_name"=>"非集团客户.xlsx","file_url"=>$url,"file_type"=>"xlsx","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+        Yii::app()->end();
+        spl_autoload_register(array('YiiBase','autoload'));
     }
 
     //导出集团客户
     protected function downAllGroup($cr,$row){
         echo "all Group\n";
         $model = new DownAllForm();
-        $model->setGroupExcl();
+        $model->setGroupExcl($row["lcd"]);
         $url = "upload/excel/HK/".date("YmdHis").".xlsx";
         $model->saveExcel($url);
         $cr->update("sev_file", array("state"=>"S","file_name"=>"集团客户.xlsx","file_url"=>$url,"file_type"=>"xlsx","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));

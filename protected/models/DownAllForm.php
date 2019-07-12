@@ -101,7 +101,7 @@ class DownAllForm {
             12=>"十二月",
         );
         $rows = Yii::app()->db->createCommand()->select("amt_name,amt_gt")->from("sev_customer_info")
-            ->group("amt_name")->order("amt_gt,CAST(amt_name as SIGNED) ASC")->queryAll();
+            ->group("amt_name,amt_gt")->order("amt_gt,CAST(amt_name as SIGNED) ASC")->queryAll();
         if ($rows){
             foreach ($rows as $row){
                 $arr[$row["amt_name"]]=$monthList[$row["amt_name"]];
@@ -143,9 +143,9 @@ class DownAllForm {
      * $heardArr=array()
      */
     //設置表頭
-    protected function setGroupHeard($title="集團客戶"){
+    protected function setGroupHeard($date,$title="集團客戶"){
         $heardArr=array(
-            "dateTime"=>"2019-7-4 14:40:45",
+            "dateTime"=>$date,
             "monthList"=>$this->getMonthList()
         );
         $this->objPHPExcel->getActiveSheet()->setTitle($title);
@@ -413,16 +413,25 @@ class DownAllForm {
         //$this->objPHPExcel->getActiveSheet()->setTitle( 'Invoice');
     }
 
-    public function setGroupExcl(){
+    public function setGroupExcl($date=""){
+        if (empty($date)){
+            $date = date("Y-m-d H:i:s");
+        }else{
+            $date = date("Y-m-d H:i:s",strtotime($date));
+        }
         set_time_limit(0);
 
         $this->setStaffList();
 
-        $this->setGroupHeard();
+        $this->setGroupHeard($date);
 
         $this->setGroupBody();
 
         $this->setStaffFooter();
+    }
+
+    public function setNotGroupExcel(){
+        set_time_limit(0);
     }
 
     //輸出excel表格

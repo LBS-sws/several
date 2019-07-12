@@ -39,17 +39,12 @@ class ImportForm extends CFormModel
         $uid = Yii::app()->user->id;
         $exportType = $this->getExportGroupType();
         if(key_exists($this->handle_name,$exportType)){
-            if($this->handle_name == "导出非集团客户"){
-                $message = "該功能正在完善，無法導出。請選擇集團客戶。";
+            $rows = Yii::app()->db->createCommand()->select("id")->from("sev_file")
+                ->where('handle_name=:handle_name and state in ("P","I") and lcu=:lcu',
+                    array(':handle_name'=>$this->handle_name,':lcu'=>$uid))->queryRow();
+            if($rows){
+                $message = "系統正在導出，請去報表管理員查看";
                 $this->addError($attribute,$message);
-            }else{
-                $rows = Yii::app()->db->createCommand()->select("id")->from("sev_file")
-                    ->where('handle_name=:handle_name and state in ("P","I") and lcu=:lcu',
-                        array(':handle_name'=>$this->handle_name,':lcu'=>$uid))->queryRow();
-                if($rows){
-                    $message = "系統正在導出，請去報表管理員查看";
-                    $this->addError($attribute,$message);
-                }
             }
         }else{
             $message = Yii::t('several','export Type'). "異常";

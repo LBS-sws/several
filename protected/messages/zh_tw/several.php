@@ -100,5 +100,12 @@ return array(
     'payment'=>'付款期限',
     'clerk'=>'會計文員',
     'export Type'=>'導出類型',
+
+    'on off'=>'服務狀態',
+    'service on'=>'服務',
+    'service off'=>'關閉',
+    'pay type'=>'現金支付',
+    'pay yes'=>'是',
+    'pay no'=>'否',
 );
 ?>

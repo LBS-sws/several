@@ -27,8 +27,11 @@ class SearchCompanyForm extends CFormModel
     public $acca_discount;
     public $salesman_id;
     public $staff_id;
+    public $payment;
     public $lud;
 
+    public $on_off;
+    public $pay_type;
 
     public $info_arr=array();
     protected $validateMonth;
@@ -59,10 +62,14 @@ class SearchCompanyForm extends CFormModel
             'phone'=>Yii::t('several','phone'),
             'lud'=>Yii::t('several','last time'),
 
+            'on_off'=>Yii::t('several','on off'),
+            'pay_type'=>Yii::t('several','pay type'),
+
             'curr'=>Yii::t('several','Curr'),
             'amt'=>Yii::t('several','Amt'),
             'remark'=>Yii::t('several','Update Remark'),
             'info_arr'=>Yii::t('several','Info Arr'),
+            'payment'=>Yii::t('several','payment'),
         );
 	}
 
@@ -89,6 +96,7 @@ class SearchCompanyForm extends CFormModel
                 $this->customer_name = $row['customer_name'];
                 $this->company_code = $row['company_code'];
 
+
                 $this->staff_id = $row['staff_id'];
                 $this->salesman_id = $row['salesman_id'];
                 $this->acca_username = $row['acca_username'];
@@ -97,6 +105,13 @@ class SearchCompanyForm extends CFormModel
                 $this->acca_fun = $row['acca_fun'];
                 $this->acca_lang = $row['acca_lang'];
                 $this->acca_discount = $row['acca_discount'];
+                $this->lud = $row['lud'];
+                $this->payment = $row['payment'];
+                $this->on_off = $row['on_off'];
+                $this->pay_type = $row['pay_type'];
+
+                $this->on_off = $row['on_off'];
+                $this->pay_type = $row['pay_type'];
                 $this->lud = $row['lud'];
 
                 //$this->refreshCustomerList();

@@ -102,5 +102,12 @@ return array(
     'clerk'=>'会计文员',
     'export Type'=>'导出类型',
 
+    'on off'=>'服务状态',
+    'service on'=>'服务',
+    'service off'=>'关闭',
+    'pay type'=>'现金支付',
+    'pay yes'=>'是',
+    'pay no'=>'否',
+
 );
 ?>

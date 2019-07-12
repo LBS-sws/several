@@ -30,6 +30,8 @@ class SearchCustomerForm extends CFormModel
     public $lud;
     public $payment;
 
+    public $on_off;
+    public $pay_type;
 
     public $firm_name;
     public $info_arr=array();
@@ -63,6 +65,9 @@ class SearchCustomerForm extends CFormModel
 
             'firm_name'=>Yii::t('several','Clients firm'),
             'curr'=>Yii::t("several","Curr"),
+
+            'on_off'=>Yii::t('several','on off'),
+            'pay_type'=>Yii::t('several','pay type'),
 
             'amt'=>Yii::t('several','Amt'),
             'remark'=>Yii::t('several','Update Remark'),
@@ -106,6 +111,8 @@ class SearchCustomerForm extends CFormModel
                 $this->acca_discount = $row['acca_discount'];
                 $this->lud = $row['lud'];
                 $this->firm_name = FirmForm::getFirmNameToId($row["firm_id"]);
+                $this->on_off = $row['on_off'];
+                $this->pay_type = $row['pay_type'];
                 //$this->refreshCustomerList();
                 break;
             }

@@ -77,4 +77,22 @@ class FunctionForm extends CFormModel
             "en_us"=>Yii::t("several","en_us")
         );
     }
+
+    //獲取服務狀態列表
+    public function getServiceList(){
+        return array(
+            //""=>"",
+            0=>Yii::t("several","service off"),
+            1=>Yii::t("several","service on"),
+        );
+    }
+
+    //獲取支付类型列表
+    public function getPayList(){
+        return array(
+            //""=>"",
+            0=>Yii::t("several","pay no"),
+            1=>Yii::t("several","pay yes"),
+        );
+    }
 }
