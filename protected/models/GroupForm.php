@@ -163,7 +163,7 @@ class GroupForm extends CFormModel
         }else{
 	        $arr = array();
         }
-        $rows = Yii::app()->db->createCommand()->select("id,company_code")->from("sev_group")->queryAll();
+        $rows = Yii::app()->db->createCommand()->select("id,company_code")->from("sev_group")->order("company_code asc")->queryAll();
         if ($rows){
             foreach ($rows as $row){
                 $arr[$row["id"]]=$row["company_code"];

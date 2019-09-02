@@ -60,6 +60,10 @@ return array(
                 'access'=>'XR04',
                 'url'=>'/firm/index',
             ),
+            'Automatic Staff'=>array(//公司列表
+                'access'=>'XR05',
+                'url'=>'/automatic/index',
+            ),
         ),
     ),
     'Search'=>array(//查詢

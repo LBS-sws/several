@@ -159,6 +159,22 @@ $this->pageTitle=Yii::app()->name . ' - staff Form';
             //echo $model->printInfoBody();
 
             ?>
+            <legend></legend>
+            <?php
+            //流程詳情
+            $html = '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("dialog","Flow Info"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-9">';
+            $html .=$model->getFlowInfoHtml($model->id);
+            $html .='</div></div>';
+            //附件詳情
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("dialog","File Attachment"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-7">';
+            $html .=$model->getFileHtml($model->id);
+            $html .='</div></div>';
+            echo $html;
+            ?>
 		</div>
 	</div>
 </section>

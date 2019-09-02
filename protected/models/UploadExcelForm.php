@@ -255,14 +255,11 @@ class UploadExcelForm extends CFormModel
             $client_code = $this->client_code;
             $client_code = intval($client_code);
             if(is_numeric($client_code)){
-                if($client_code<=10){
-                    $str["staff_id"] = $this->staffOnlyList["LISA"];
-                }elseif (($client_code>=11&&$client_code<=119)||$client_code>=300){
-                    $str["staff_id"] = $this->staffOnlyList["NATALIE"];
-                }elseif ($client_code>=120&&$client_code<=199){
-                    $str["staff_id"] = $this->staffOnlyList["JOANN"];
-                }elseif ($client_code>=200&&$client_code<=299){
-                    $str["staff_id"] = $this->staffOnlyList["DAVID"];
+                $this->command->reset();
+                $rows = $this->command->select("id")->from("sev_automatic")
+                    ->where('min_num<=:num and max_num>:num',array(':num'=>$client_code))->queryRow();
+                if($rows){
+                    $str["staff_id"] = $this->staffOnlyList[$rows["id"]];
                 }
             }
             unset($client_code);
@@ -572,23 +569,25 @@ class UploadExcelForm extends CFormModel
 
     private function resetStaffOnlyList(){
         $arr = array();
-        $staffList = array("LISA","NATALIE","JOANN","DAVID");
-        foreach ($staffList as $staff){
-            $this->command->reset();
-            $rows = $this->command->select("id")->from("sev_staff")
-                ->where('staff_name=:staff_name',array(':staff_name'=>$staff))->queryRow();
-            if($rows){
-                $arr[$staff] = $rows["id"];
-            }else{
+        $this->command->reset();
+        $automaticList = $this->command->select("id,staff_name")->from("sev_automatic")->queryAll();
+        if($automaticList){
+            foreach ($automaticList as $automatic){
                 $this->command->reset();
-                $this->command->insert("sev_staff", array("staff_name"=>$staff));
-                $arr[$staff] = Yii::app()->db->getLastInsertID();
+                $rows = $this->command->select("id")->from("sev_staff")
+                    ->where('staff_name=:staff_name',array(':staff_name'=>$automatic["staff_name"]))->queryRow();
+                if($rows){
+                    $staff_id = $rows["id"];
+                }else{
+                    $this->command->reset();
+                    $this->command->insert("sev_staff", array("staff_name"=>$automatic["staff_name"]));
+                    $staff_id = Yii::app()->db->getLastInsertID();
+                }
+                $arr[$automatic["id"]] = $staff_id;
             }
-            unset($rows);
         }
         $this->staffOnlyList = $arr;
         unset($arr);
-        unset($staffList);
     }
 
     public function getMonth(){

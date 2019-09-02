@@ -24,7 +24,7 @@ class SearchGroupList extends CListPageModel
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 //GROUP BY e.customer_id
-		$sql1 = "SELECT a.group_id,g.company_code,g.salesman_one_ts,SUM(b.amt) as arrears_money,COUNT(b.amt) AS occurrences_num,
+		$sql1 = "SELECT g.id,g.company_code,g.salesman_one_ts,SUM(b.amt) as arrears_money,COUNT(b.amt) AS occurrences_num,
             sum(case when b.amt>0 then 1 else 0 end ) as arrears_number
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
@@ -57,7 +57,7 @@ class SearchGroupList extends CListPageModel
 		$sql = $sql2.$clause;
 		$this->totalRow = Yii::app()->db->createCommand($sql)->queryScalar();
 
-		$sql = $sql1.$clause." GROUP BY a.group_id ".$order;
+		$sql = $sql1.$clause." GROUP BY g.id,g.company_code,g.salesman_one_ts ".$order;
 		$sql = $this->sqlWithPageCriteria($sql, $this->pageNum);
 		$records = Yii::app()->db->createCommand($sql)->queryAll();
 
@@ -65,7 +65,7 @@ class SearchGroupList extends CListPageModel
 		if (count($records) > 0) {
 			foreach ($records as $k=>$record) {
 				$this->attr[] = array(
-					'id'=>$record['group_id'],
+					'id'=>$record['id'],
 					'company_code'=>$record['company_code'],
 					'occurrences_num'=>$record['occurrences_num'],
 					'arrears_number'=>$record['arrears_number'],

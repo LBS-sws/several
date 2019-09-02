@@ -95,6 +95,7 @@ return array(
     'Batch Modifying customer'=>'客戶批量修改',
     'export only group'=>'導出集團客戶',
     'export not group'=>'導出非集團客戶',
+    'export row customer'=>'導出客戶追數詳情',
     'export several'=>'導出會計追數',
     //沈超添加结束
 );

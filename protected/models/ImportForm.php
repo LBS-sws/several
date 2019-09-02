@@ -56,6 +56,7 @@ class ImportForm extends CFormModel
 	    return array(
 	        "导出集团客户"=>Yii::t("app",'export only group'),
 	        "导出非集团客户"=>Yii::t("app",'export not group'),
+	        "导出客户追数详情"=>Yii::t("app",'export row customer'),
         );
     }
 	

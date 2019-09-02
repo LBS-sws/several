@@ -27,7 +27,7 @@ class SearchStaffList extends CListPageModel
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 //GROUP BY e.customer_id
-		$sql1 = "SELECT g.*,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.amt) AS occurrences_num
+		$sql1 = "SELECT g.id,g.staff_name,g.staff_phone,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.amt) AS occurrences_num
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_staff g ON g.id = a.staff_id
@@ -61,7 +61,7 @@ class SearchStaffList extends CListPageModel
 		$sql = $sql2.$clause;
 		$this->totalRow = Yii::app()->db->createCommand($sql)->queryScalar();
 
-		$sql = $sql1.$clause." GROUP BY a.staff_id ".$order;
+		$sql = $sql1.$clause." GROUP BY g.id,g.staff_name,g.staff_phone ".$order;
 		$sql = $this->sqlWithPageCriteria($sql, $this->pageNum);
 		$records = Yii::app()->db->createCommand($sql)->queryAll();
 

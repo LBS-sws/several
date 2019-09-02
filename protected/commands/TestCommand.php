@@ -23,6 +23,9 @@ class TestCommand extends CConsoleCommand {
                 case "导出非集团客户":
                     $this->downNotGroup($cr,$row);
                     break;
+                case "导出客户追数详情":
+                    $this->downRowCustomer($cr,$row);
+                    break;
 
             }
         }
@@ -49,6 +52,18 @@ class TestCommand extends CConsoleCommand {
         $url = "upload/excel/HK/".date("YmdHis").".xlsx";
         $model->saveExcel($url);
         $cr->update("sev_file", array("state"=>"S","file_name"=>"集团客户.xlsx","file_url"=>$url,"file_type"=>"xlsx","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
+        Yii::app()->end();
+        spl_autoload_register(array('YiiBase','autoload'));
+    }
+
+    //导出客户追数详情
+    protected function downRowCustomer($cr,$row){
+        echo "row Customer\n";
+        $model = new DownRowForm();
+        $model->setRowExcel($row["lcd"]);
+        $url = "upload/excel/HK/".date("YmdHis").".xlsx";
+        $model->saveExcel($url);
+        $cr->update("sev_file", array("state"=>"S","file_name"=>"客户追数详情.xlsx","file_url"=>$url,"file_type"=>"xlsx","lud"=>date("Y-m-d H:i:s")),"id=:id",array(":id"=>$row["id"]));
         Yii::app()->end();
         spl_autoload_register(array('YiiBase','autoload'));
     }

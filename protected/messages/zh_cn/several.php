@@ -109,5 +109,25 @@ return array(
     'pay yes'=>'是',
     'pay no'=>'否',
 
+    'branch'=>'细公司',
+
+    'record info'=>'操作记录',
+    'accountant fax'=>'联络人传真',
+    'refer code'=>'参考编码',
+    'usual date'=>'常规日期',
+    'head worker'=>'交予同事',
+    'other worker'=>'其它跟进同事',
+    'advance name'=>'预付客户',
+    'listing name'=>'月结单做法',
+    'listing email'=>'月结单电邮',
+    'listing fax'=>'月结单传真',
+    'new month'=>'客户新增月份',
+    'month num'=>'欠款月数',
+    'lbs month'=>'总公司欠款月数',
+    'other month'=>'细公司欠款月数',
+    'Automatic Staff Form'=>'自动指派员工表单',
+    'Automatic Staff List'=>'自动指派员工列表',
+    'automatic min'=>'最小值(包含等于)',
+    'automatic max'=>'最大值(不包含等于)',
 );
 ?>

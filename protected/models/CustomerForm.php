@@ -24,6 +24,7 @@ class CustomerForm extends CFormModel
 	public $acca_remark;
 	public $acca_fun;
 	public $acca_lang;
+	public $acca_fax;
 	public $acca_discount;
 	public $salesman_id;
 	public $staff_id;
@@ -33,6 +34,17 @@ class CustomerForm extends CFormModel
 	public $on_off;
 	public $pay_type;
 
+    public $refer_code;
+    public $usual_date;
+    public $head_worker;
+    public $other_worker;
+    public $advance_name;
+    public $listing_name;
+    public $listing_email;
+    public $listing_fax;
+    public $new_month;
+    public $lbs_month;
+    public $other_month;
 
 	public $info_arr=array();
 	protected $validateMonth;
@@ -72,6 +84,7 @@ class CustomerForm extends CFormModel
             'acca_discount'=>Yii::t('several','discount'),
             'acca_remark'=>Yii::t('several','accountant remark'),
             'acca_fun'=>Yii::t('several','method'),
+            'acca_fax'=>Yii::t('several','accountant fax'),
             'salesman_id'=>Yii::t('several','salesman'),
             'staff_id'=>Yii::t('several','assign staff'),
             'phone'=>Yii::t('several','phone'),
@@ -85,6 +98,16 @@ class CustomerForm extends CFormModel
             'remark'=>Yii::t('several','Update Remark'),
             'info_arr'=>Yii::t('several','Info Arr'),
             'payment'=>Yii::t('several','payment'),
+
+            'refer_code'=>Yii::t('several','refer code'),
+            'usual_date'=>Yii::t('several','usual date'),
+            'head_worker'=>Yii::t('several','head worker'),
+            'other_worker'=>Yii::t('several','other worker'),
+            'advance_name'=>Yii::t('several','advance name'),
+            'listing_name'=>Yii::t('several','listing name'),
+            'listing_email'=>Yii::t('several','listing email'),
+            'listing_fax'=>Yii::t('several','listing fax'),
+            'new_month'=>Yii::t('several','new month'),
         );
 	}
 
@@ -96,25 +119,36 @@ class CustomerForm extends CFormModel
 		return array(
 			//array('id, position, leave_reason, remarks, email, staff_type, leader','safe'),
             array('id, customer_id, remark, firm_id, client_code, customer_name, company_code, curr, info_arr, pay_type, on_off
+            ,acca_fax,refer_code,usual_date,head_worker,other_worker,advance_name,listing_name,listing_email,listing_fax,new_month,lbs_month,other_month,
             ,acca_username,acca_phone,acca_lang,acca_discount,acca_remark,acca_fun,salesman_id,staff_id,payment,lud','safe'),
 			array('remark,id','required'),
 			//array('info_arr','validateInfoArr'),  //因為無法修改欠款所以取消
 			array('id','validateId'),
+			array('refer_code','validateReferCode'),
             array('files, removeFileId, docMasterId, no_of_attm','safe'),
 		);
 	}
 
+	public function validateReferCode($attribute, $params){
+	    if($this->refer_code==6||$this->refer_code == 8){
+	        $this->on_off = 0;
+        }else{
+	        $this->on_off = 1;
+        }
+    }
+
 	public function validateId($attribute, $params){
         if (!empty($this->id)){
             $firm_str = Yii::app()->user->firm();
-            $row = Yii::app()->db->createCommand()->select()->from("sev_customer_firm")
-                ->where("id=:id and firm_id in ($firm_str)", array(':id'=>$this->id))->queryRow();
-            if($row){
-                $this->customer_id = $row["customer_id"];
-            }else{
+            $row = Yii::app()->db->createCommand()->select("a.customer_id")->from("sev_customer_firm a")
+                ->leftJoin("sev_customer b","b.id=a.customer_id")
+                ->where("b.id=:id and a.firm_id in ($firm_str)", array(':id'=>$this->id))->queryRow();
+            if(!$row){
                 $message = Yii::t('several','ID'). "不存在";
                 $this->addError($attribute,$message);
                 return false;
+            }else{
+                $this->customer_id = $this->id;
             }
         }
     }
@@ -183,15 +217,14 @@ class CustomerForm extends CFormModel
 
     public function ajaxUpdateHtml($id){
         $firm_str = Yii::app()->user->firm();
-        $row = Yii::app()->db->createCommand()->select("a.id as s_id,a.curr,c.client_code,c.customer_name,b.*")->from("sev_customer_firm a")
-            ->leftJoin("sev_customer b","b.id = a.customer_id")
+        $row = Yii::app()->db->createCommand()->select("c.client_code,c.customer_name,b.*")->from("sev_customer b")
             ->leftJoin("sev_company c","c.id = b.company_id")
-            ->where("a.id=:id and a.firm_id in ($firm_str)", array(':id'=>$id))->queryRow();
+            ->where("b.id=:id", array(':id'=>$id))->queryRow();
         if($row){
             $html = '<div class="modal-header"><button class="close" data-dismiss="modal" type="button">×</button><h4 class="modal-title">修改</h4></div>';
 
             $html.='<div class="modal-body">';
-            $html .=TbHtml::hiddenField("updateWindow[id]",$row["s_id"]);
+            $html .=TbHtml::hiddenField("updateWindow[id]",$row["id"]);
 
             $html .= '<div class="form-group">';
             $html .=TbHtml::label(Yii::t("several","Customer Code"),"",array('class'=>"col-sm-2 control-label"));
@@ -200,7 +233,7 @@ class CustomerForm extends CFormModel
             $html .='</div>';
             $html .=TbHtml::label(Yii::t("several","ID"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
-            $html .=TbHtml::textField("updateWindow[id]",$row["s_id"],array('readonly'=>(true)));
+            $html .=TbHtml::textField("updateWindow[id]",$row["id"],array('readonly'=>(true)));
             $html .='</div>';
             $html.='</div>';
             $html .= '<div class="form-group">';
@@ -226,6 +259,17 @@ class CustomerForm extends CFormModel
             $html .='<div class="col-sm-4">';
             $html .=TbHtml::dropDownList("updateWindow[acca_lang]",$row["acca_lang"],FunctionForm::getAllLang());
             $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","accountant fax"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_fax]",$row["acca_fax"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","usual date"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4"><div class="input-group"><div class="input-group-addon"><i class="fa fa-calendar"></i></div>';
+            $html .=TbHtml::textField("updateWindow[usual_date]",$row["usual_date"],array('class'=>"usual_date"));
+            $html .='</div></div>';
             $html .=TbHtml::label(Yii::t("several","discount"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
             $html .=TbHtml::textField("updateWindow[acca_discount]",$row["acca_discount"]);
@@ -233,30 +277,68 @@ class CustomerForm extends CFormModel
             $html.='</div>';
 
             $html .= '<div class="form-group">';
-            $html .=TbHtml::label(Yii::t("several","method"),"",array('class'=>"col-sm-2 control-label"));
+            $html .=TbHtml::label(Yii::t("several","refer code"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
-            $html .=TbHtml::textField("updateWindow[acca_fun]",$row["acca_fun"]);
+            $html .=TbHtml::textField("updateWindow[refer_code]",$row["refer_code"],array("class"=>"refer_code"));
             $html .='</div>';
-            $html .=TbHtml::label(Yii::t("several","payment"),"",array('class'=>"col-sm-2 control-label"));
+            $html .=TbHtml::label(Yii::t("several","on off"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
-            $html .=TbHtml::textField("updateWindow[payment]",$row["payment"]);
+            $html .=TbHtml::dropDownList("updateWindow[on_off]",$row["on_off"],FunctionForm::getServiceList(),array("readonly"=>true,"class"=>"on_off"));
             $html .='</div>';
             $html.='</div>';
 
             $html .= '<div class="form-group">';
-            $html .=TbHtml::label(Yii::t("several","Curr"),"",array('class'=>"col-sm-2 control-label"));
-            $html .='<div class="col-sm-5">';
-            $html .=TbHtml::textField("updateWindow[curr]",$row["curr"]);
-            $html .='</div></div>';
+            $html .=TbHtml::label(Yii::t("several","head worker"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[head_worker]",$row["head_worker"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","other worker"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[other_worker]",$row["other_worker"]);
+            $html .='</div>';
+            $html.='</div>';
 
             $html .= '<div class="form-group">';
-            $html .=TbHtml::label(Yii::t("several","on off"),"",array('class'=>"col-sm-2 control-label"));
+            $html .=TbHtml::label(Yii::t("several","listing name"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
-            $html .=TbHtml::dropDownList("updateWindow[acca_fun]",$row["on_off"],FunctionForm::getServiceList());
+            $html .=TbHtml::textField("updateWindow[listing_name]",$row["listing_name"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","listing email"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[listing_email]",$row["listing_email"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","listing fax"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[listing_fax]",$row["listing_fax"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","new month"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[new_month]",$row["new_month"]);
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","advance name"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[advance_name]",$row["advance_name"]);
             $html .='</div>';
             $html .=TbHtml::label(Yii::t("several","pay type"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-4">';
             $html .=TbHtml::dropDownList("updateWindow[pay_type]",$row["pay_type"],FunctionForm::getPayList());
+            $html .='</div>';
+            $html.='</div>';
+
+            $html .= '<div class="form-group">';
+            $html .=TbHtml::label(Yii::t("several","payment"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[payment]",$row["payment"]);
+            $html .='</div>';
+            $html .=TbHtml::label(Yii::t("several","method"),"",array('class'=>"col-sm-2 control-label"));
+            $html .='<div class="col-sm-4">';
+            $html .=TbHtml::textField("updateWindow[acca_fun]",$row["acca_fun"]);
             $html .='</div>';
             $html.='</div>';
 
@@ -363,12 +445,6 @@ class CustomerForm extends CFormModel
             $html .= '<div class="col-sm-5">';
             $html .= SearchCustomerForm::getAmtHtml($arr["id"]);
             $html .= '</div></div>';
-            //流程詳情
-            $html .= '<div class="form-group">';
-            $html .= TbHtml::label(Yii::t("dialog", "Flow Info"), "", array('class' => "col-sm-2 control-label"));
-            $html .= '<div class="col-sm-9">';
-            $html .= SearchCustomerForm::getFlowInfoHtml($arr["id"]);
-            $html .= '</div></div>';
         }
         return $html;
     }
@@ -399,18 +475,18 @@ class CustomerForm extends CFormModel
 	public function retrieveData($index)
 	{
         $firm_str = Yii::app()->user->firm();
-        $rows = Yii::app()->db->createCommand()->select("a.id as s_id,a.customer_id,a.firm_id,a.curr,a.amt,d.*,b.client_code,b.customer_name,c.company_code,countdoc('CUST',a.id) as custdoc")->from("sev_customer_firm a")
-            ->leftJoin("sev_customer d","a.customer_id=d.id")
+        $rows = Yii::app()->db->createCommand()->select("d.*,b.client_code,b.customer_name,c.company_code,countdoc('CUST',d.id) as custdoc")
+            ->from("sev_customer d")
             ->leftJoin("sev_company b","d.company_id=b.id")
             ->leftJoin("sev_group c","d.group_id=c.id")
-            ->where("a.id=:id and a.firm_id in ($firm_str)", array(':id'=>$index))->queryAll();
+            ->where("d.id=:id", array(':id'=>$index))->queryAll();
 		if (count($rows) > 0)
 		{
 			foreach ($rows as $row)
 			{
-				$this->id = $row['s_id'];
-				$this->customer_id = $row['customer_id'];
-				$this->firm_id = $row['firm_id'];
+				$this->id = $row['id'];
+				$this->customer_id = $row['id'];
+
 				$this->client_code = $row['client_code'];
                 $this->customer_name = $row['customer_name'];
                 $this->company_code = $row['company_code'];
@@ -427,6 +503,19 @@ class CustomerForm extends CFormModel
                 $this->payment = $row['payment'];
                 $this->on_off = $row['on_off'];
                 $this->pay_type = $row['pay_type'];
+//acca_fax,refer_code,usual_date,head_worker,other_worker,advance_name,listing_name,listing_email,listing_fax,new_month,lbs_month,other_month,
+                $this->acca_fax = $row['acca_fax'];
+                $this->refer_code = $row['refer_code'];
+                $this->usual_date = $row['usual_date'];
+                $this->head_worker = $row['head_worker'];
+                $this->other_worker = $row['other_worker'];
+                $this->advance_name = $row['advance_name'];
+                $this->listing_name = $row['listing_name'];
+                $this->listing_email = $row['listing_email'];
+                $this->listing_fax = $row['listing_fax'];
+                $this->new_month = $row['new_month'];
+                $this->lbs_month = $row['lbs_month'];
+                $this->other_month = $row['other_month'];
 
                 $this->no_of_attm['cust'] = $row['custdoc'];
 /*                $this->curr = $row['curr'];
@@ -465,13 +554,28 @@ class CustomerForm extends CFormModel
         $firm_list = Yii::app()->user->firm_list();
         $list = $this->info_arr;
         $lcu = Yii::app()->user->id;
+//acca_fax,refer_code,usual_date,head_worker,other_worker,advance_name,listing_name,listing_email,listing_fax,new_month,lbs_month,other_month,
         Yii::app()->db->createCommand()->update('sev_customer', array(
             'acca_username'=>$this->acca_username,
             'acca_phone'=>$this->acca_phone,
             'acca_remark'=>$this->acca_remark,
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
+            'acca_fax'=>$this->acca_fax,
             'acca_discount'=>$this->acca_discount,
+
+            'refer_code'=>$this->refer_code,
+            'usual_date'=>$this->usual_date,
+            'head_worker'=>$this->head_worker,
+            'other_worker'=>$this->other_worker,
+            'advance_name'=>$this->advance_name,
+            'listing_name'=>$this->listing_name,
+            'listing_email'=>$this->listing_email,
+            'listing_fax'=>$this->listing_fax,
+            'new_month'=>$this->new_month,
+            'lbs_month'=>$this->lbs_month,
+            'other_month'=>$this->other_month,
+
             'on_off'=>$this->on_off,
             'pay_type'=>$this->pay_type,
             'lud'=>date("Y-m-d H:i:s"),
@@ -509,7 +613,7 @@ class CustomerForm extends CFormModel
 
         //保存備註
         Yii::app()->db->createCommand()->insert("sev_remark_list", array(
-            "firm_cus_id"=>$this->id,
+            "customer_id"=>$this->id,
             "remark"=>$this->remark,
             "lcu"=>$lcu,
         ));
@@ -524,9 +628,23 @@ class CustomerForm extends CFormModel
             'acca_fun'=>$this->acca_fun,
             'acca_lang'=>$this->acca_lang,
             'acca_discount'=>$this->acca_discount,
+            'acca_fax'=>$this->acca_fax,
             'payment'=>$this->payment,
             'on_off'=>$this->on_off,
             'pay_type'=>$this->pay_type,
+
+            'refer_code'=>$this->refer_code,
+            'usual_date'=>$this->usual_date,
+            'head_worker'=>$this->head_worker,
+            'other_worker'=>$this->other_worker,
+            'advance_name'=>$this->advance_name,
+            'listing_name'=>$this->listing_name,
+            'listing_email'=>$this->listing_email,
+            'listing_fax'=>$this->listing_fax,
+            'new_month'=>$this->new_month,
+            'lbs_month'=>$this->lbs_month,
+            'other_month'=>$this->other_month,
+
             'status_type'=>'y',
             'lud'=>date("Y-m-d H:i:s")
         ), 'id=:id', array(':id'=>$this->customer_id));
@@ -538,7 +656,7 @@ class CustomerForm extends CFormModel
         }
         //保存備註
         Yii::app()->db->createCommand()->insert("sev_remark_list", array(
-            "firm_cus_id"=>$this->id,
+            "customer_id"=>$this->id,
             "remark"=>$this->remark,
             "lcu"=>$lcu,
         ));

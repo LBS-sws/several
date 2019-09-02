@@ -94,7 +94,7 @@ class SearchCustomerForm extends CFormModel
             foreach ($rows as $row)
             {
                 $this->id = $row['s_id'];
-                //$this->customer_id = $row['customer_id'];
+                $this->customer_id = $row['id'];
                 $this->firm_id = $row['firm_id'];
                 $this->client_code = $row['client_code'];
                 $this->curr = $row['curr'];
@@ -143,13 +143,13 @@ class SearchCustomerForm extends CFormModel
             $html .= '<div class="form-group">';
             $html .=TbHtml::label(Yii::t("dialog","Flow Info"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-9">';
-            $html .=$this->getFlowInfoHtml($this->id);
+            $html .=$this->getFlowInfoHtml($this->customer_id);
             $html .='</div></div>';
             //附件詳情
             $html .= '<div class="form-group">';
             $html .=TbHtml::label(Yii::t("dialog","File Attachment"),"",array('class'=>"col-sm-2 control-label"));
             $html .='<div class="col-sm-7">';
-            $html .=$this->getFileHtml($this->id);
+            $html .=$this->getFileHtml($this->customer_id);
             $html .='</div></div>';
 
         }
@@ -189,11 +189,11 @@ class SearchCustomerForm extends CFormModel
     }
 
     //流程詳情
-    public function getFlowInfoHtml($firm_cus_id){
+    public function getFlowInfoHtml($customer_id){
         $html = "";
         $info_all = Yii::app()->db->createCommand()->select("a.*,b.disp_name")->from("sev_remark_list a")
             ->leftJoin("sec_user b","a.lcu=b.username")
-            ->where("a.firm_cus_id=:id", array(':id'=>$firm_cus_id))->order("lcd desc")->queryAll();
+            ->where("a.customer_id=:id", array(':id'=>$customer_id))->order("lcd desc")->queryAll();
         if($info_all){
             $html .= "<table class='table table-bordered'><thead><tr>";
             $html .= "<th width='20%'>".Yii::t('dialog','Date')."</th>";
@@ -216,17 +216,17 @@ class SearchCustomerForm extends CFormModel
     }
 
     //附件詳情
-    private function getFileHtml($firm_cus_id)
+    private function getFileHtml($customer_id)
     {
         $html = "";
-        $info_all = Yii::app()->db->createCommand()->select("*")->from("sev_customer_info")
-            ->where("firm_cus_id=:id", array(':id' => $firm_cus_id))->order("CAST(amt_name as SIGNED) desc")->queryAll();
+        $info_all = Yii::app()->db->createCommand()->select("*")->from("sev_customer")
+            ->where("id=:id", array(':id' => $customer_id))->order("id desc")->queryAll();
         if ($info_all) {
             $html = "";
             $info_all = Yii::app()->db->createCommand()->select("a.id, a.doc_type_code, a.doc_id,
             b.id as file_id, b.display_name, b.archive, b.lcd, b.file_type ")->from("dm_master a")
                 ->leftJoin("dm_file b", "a.id=b.mast_id")
-                ->where("a.doc_type_code='CUST' and a.doc_id=:id and b.remove='N'", array(':id' => $firm_cus_id))
+                ->where("a.doc_type_code='CUST' and a.doc_id=:id and b.remove='N'", array(':id' => $customer_id))
                 ->order("b.display_name, b.lcd desc")->queryAll();
             if ($info_all) {
                 $html .= "<table class='table table-bordered'><thead><tr>";

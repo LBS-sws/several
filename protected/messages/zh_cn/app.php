@@ -92,6 +92,8 @@ return array(
     'export only group'=>'导出集团客户',
     'export not group'=>'导出非集团客户',
     'export several'=>'导出会计追数',
+    'export row customer'=>'导出客户追数详情',
+    'Automatic Staff'=>'自动指派员工',
     //沈超添加结束
 );
 ?>

@@ -3,6 +3,9 @@
 class CustomerList extends CListPageModel
 {
     public $searchArrears;//
+
+    public $firmList=array();
+    public $tableHeardList=array();
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -28,12 +31,26 @@ class CustomerList extends CListPageModel
             'acca_discount'=>Yii::t('several','discount'),
             'acca_remark'=>Yii::t('several','accountant remark'),
             'acca_fun'=>Yii::t('several','method'),
+            'acca_fax'=>Yii::t('several','accountant fax'),
             'salesman_id'=>Yii::t('several','salesman'),
             'staff_id'=>Yii::t('several','assign staff'),
             'phone'=>Yii::t('several','phone'),
             'group_type'=>Yii::t('several','group type'),
             'lud'=>Yii::t('several','last time'),
             'payment'=>Yii::t('several','payment'),
+
+            'refer_code'=>Yii::t('several','refer code'),
+            'usual_date'=>Yii::t('several','usual date'),
+            'head_worker'=>Yii::t('several','head worker'),
+            'other_worker'=>Yii::t('several','other worker'),
+            'advance_name'=>Yii::t('several','advance name'),
+            'listing_name'=>Yii::t('several','listing name'),
+            'listing_email'=>Yii::t('several','listing email'),
+            'listing_fax'=>Yii::t('several','listing fax'),
+            'new_month'=>Yii::t('several','new month'),
+
+            'lbs_month'=>"总公司<br>".Yii::t('several','month num'),
+            'other_month'=>Yii::t('several','branch')."<br>".Yii::t('several','month num'),
 		);
 	}
     public function rules()
@@ -42,36 +59,70 @@ class CustomerList extends CListPageModel
             array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchArrears','safe',),
         );
     }
-	
+
+
+    public function getFirmSql(){
+        $firm_str = Yii::app()->user->firm();
+        $sqlStr="";
+        $monthList = UploadExcelForm::getMonth();
+        $firmList = array();
+        $rows = Yii::app()->db->createCommand()->select()->from("sev_firm")
+            ->where("id in ($firm_str)")->order("firm_type desc")->queryAll();
+        foreach ($rows as $row){
+            $item = $row["id"];
+            $sqlStr.=empty($sqlStr)?"":" or ";
+            $sqlStr.=" FIND_IN_SET('$item',a.firm_name_id)";
+
+            $this->firmList[$row["id"]] = array("name"=>$row["firm_name"],"type"=>$row["firm_type"]);
+            if(empty($row["firm_type"])){
+                $firmList[] = $row["id"];
+            }
+        }
+        $this->firmList["branch"] = array("name"=>Yii::t("several","branch"),"type"=>0);//係公司
+
+        $rows = Yii::app()->db->createCommand()->select("b.firm_id,a.amt_gt,a.amt_name")->from("sev_customer_info a")
+            ->leftJoin("sev_customer_firm b","a.firm_cus_id = b.id")
+            ->where("b.firm_id in ($firm_str)")
+            ->group("b.firm_id,a.amt_gt,a.amt_name")->order("a.amt_name asc,a.amt_gt desc")->queryAll();
+        foreach ($rows as $row){
+            $str = $row["amt_gt"] != 1?"或之前":"";
+            $key = $row["amt_gt"].$row["amt_name"];
+            //var_dump($key);die();
+            $this->tableHeardList[$row["firm_id"]][$key] = $monthList[$row["amt_name"]].$str;
+            if(in_array($row["firm_id"],$firmList)){
+                $this->tableHeardList["branch"][$key] = $monthList[$row["amt_name"]].$str;
+            }
+        }
+
+        if(!empty($sqlStr)){
+            $sqlStr="(".$sqlStr.")";
+        }
+        return $sqlStr;
+    }
+
 	public function retrieveDataByPage($pageNum=1)
 	{
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 		$firm_str = Yii::app()->user->firm();
+		$firmSql = $this->getFirmSql();
 
-		$sql1 = "select a.customer_id,a.firm_id,a.id as firm_cus_id,a.curr,a.amt,a.id as s_id,b.*,c.client_code,c.customer_name,d.company_code,e.firm_name
-				from sev_customer_firm a 
-				LEFT JOIN sev_firm e ON a.firm_id = e.id
-				LEFT JOIN sev_customer b ON a.customer_id = b.id
-				LEFT JOIN sev_company c ON c.id = b.company_id
-				LEFT JOIN sev_group d ON d.id = b.group_id
-				where a.firm_id in($firm_str) 
+		$sql1 = "select a.*,c.client_code,c.customer_name,d.company_code
+				from sev_customer a 
+				LEFT JOIN sev_company c ON c.id = a.company_id
+				LEFT JOIN sev_group d ON d.id = a.group_id
+				where $firmSql 
 			";
         $sql2 = "select count(*)
-				from sev_customer_firm a 
-				LEFT JOIN sev_firm e ON a.firm_id = e.id
-				LEFT JOIN sev_customer b ON a.customer_id = b.id
-				LEFT JOIN sev_company c ON c.id = b.company_id
-				LEFT JOIN sev_group d ON d.id = b.group_id
-				where a.firm_id in($firm_str) 
+				from sev_customer a 
+				LEFT JOIN sev_company c ON c.id = a.company_id
+				LEFT JOIN sev_group d ON d.id = a.group_id
+				where $firmSql 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
 			$svalue = str_replace("'","\'",$this->searchValue);
 			switch ($this->searchField) {
-				case 'firm_name':
-					$clause .= General::getSqlConditionClause('e.firm_name',$svalue);
-					break;
 				case 'client_code':
 					$clause .= General::getSqlConditionClause('c.client_code',$svalue);
 					break;
@@ -81,16 +132,8 @@ class CustomerList extends CListPageModel
 				case 'company_code':
 					$clause .= General::getSqlConditionClause('d.company_code',$svalue);
 					break;
-				case 'curr':
-					$clause .= General::getSqlConditionClause('a.curr',$svalue);
-					break;
 			}
 		}
-		if($this->searchArrears == "on arrears"){
-            $clause .= " and a.amt>0";
-        }elseif ($this->searchArrears == "off arrears"){
-            $clause .= " and (a.amt <= 0 or a.amt = '' or a.amt is null)";
-        }
 		
 		$order = "";
 		if (!empty($this->orderField)) {
@@ -112,29 +155,37 @@ class CustomerList extends CListPageModel
 		    $StaffForm = new StaffForm();
 		    $langList = FunctionForm::getAllLang();
 			foreach ($records as $k=>$record) {
-			    $color = floatval($record['amt'])>0?"text-danger":"text-primary";
+			    //$color = floatval($record['amt'])>0?"text-danger":"text-primary";
 				$this->attr[] = array(
-					'id'=>$record['s_id'],
-					'customer_id'=>$record['customer_id'],
-					'firm_name'=>$record['firm_name'],
+					'id'=>$record['id'],
 					'client_code'=>$record['client_code'],
 					'customer_name'=>$record['customer_name'],
 					'company_code'=>$record['company_code'],
-					'curr'=>$record['curr'],
-                    'amt'=>$record['amt'],
                     'status_type'=>$record['status_type'],
-                    'color'=>$color,
-                    'remarkHtml'=>$this->getRemarkHtml($record["firm_cus_id"]),
-                    'firmHtml'=>$this->getFirmHtml($record["firm_cus_id"]),
+                    'color'=>"",
 
 					'staff_id'=>$StaffForm->getStaffNameToId($record['staff_id']),
 					'salesman_id'=>$StaffForm->getStaffNameToId($record['salesman_id']),
+					'tableBody'=>$this->getFirmAllAmt($record['id']),
 					'payment'=>$record['payment'],
 					'group_type'=>empty($record['group_type'])?Yii::t("several","not group"):Yii::t("several","is group"),
 					'acca_username'=>$record['acca_username'],
 					'acca_phone'=>$record['acca_phone'],
 					'acca_fun'=>$record['acca_fun'],
 					'acca_lang'=>$langList[$record['acca_lang']],
+
+                    'acca_fax'=>$record['acca_fax'],
+                    'refer_code'=>$record['refer_code'],
+                    'usual_date'=>$record['usual_date'],
+                    'head_worker'=>$record['head_worker'],
+                    'other_worker'=>$record['other_worker'],
+                    'advance_name'=>$record['advance_name'],
+                    'listing_name'=>$record['listing_name'],
+                    'listing_email'=>$record['listing_email'],
+                    'listing_fax'=>$record['listing_fax'],
+                    'new_month'=>$record['new_month'],
+                    'lbs_month'=>$record['lbs_month'],
+                    'other_month'=>$record['other_month'],
 				);
 			}
 		}
@@ -142,6 +193,18 @@ class CustomerList extends CListPageModel
 		$session['customer_01'] = $this->getCriteria();
 		return true;
 	}
+
+	protected function getFirmAllAmt($cus_id){
+        $arr = array();
+        $rows = Yii::app()->db->createCommand()->select("b.firm_id,a.amt_gt,a.amt_name,a.amt_num")->from("sev_customer_info a")
+            ->leftJoin("sev_customer_firm b","a.firm_cus_id = b.id")
+            ->where("b.customer_id='$cus_id'")->queryAll();
+        foreach ($rows as $row){
+            $key = $row["amt_gt"].$row["amt_name"];
+            $arr[$row["firm_id"]][$key] = $row["amt_num"];
+        }
+	    return $arr;
+    }
 
 	public function getArrearsList(){
 	    return array(
@@ -151,11 +214,11 @@ class CustomerList extends CListPageModel
         );
     }
 
-    public function getRemarkHtml($firm_id){
+    public function getRemarkHtml($customer_id){
         $html = "";
         $rows = Yii::app()->db->createCommand()->select("a.remark,b.disp_name,a.lcd")->from("sev_remark_list a")
             ->leftJoin("sec_user b","a.lcu = b.username")
-            ->where("a.firm_cus_id=:firm_cus_id",array(':firm_cus_id'=>$firm_id))->order("a.lcd desc")->queryAll();
+            ->where("a.customer_id=:customer_id",array(':customer_id'=>$customer_id))->order("a.lcd desc")->queryAll();
 
         if($rows){
             $num = 0;

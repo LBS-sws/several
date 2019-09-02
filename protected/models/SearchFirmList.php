@@ -26,7 +26,7 @@ class SearchFirmList extends CListPageModel
 		$suffix = Yii::app()->params['envSuffix'];
 		$city = Yii::app()->user->city_allow();
 //GROUP BY e.customer_id
-		$sql1 = "SELECT g.*,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.firm_id) AS occurrences_num
+		$sql1 = "SELECT g.id,g.firm_name,SUM(b.amt) as collection,sum(case when b.amt>0 then 1 else 0 end ) as collection_num,COUNT(b.firm_id) AS occurrences_num
              FROM sev_customer_firm b
             LEFT JOIN sev_customer a ON a.id = b.customer_id
             LEFT JOIN sev_firm g ON g.id = b.firm_id
@@ -57,7 +57,7 @@ class SearchFirmList extends CListPageModel
 		$sql = $sql2.$clause;
 		$this->totalRow = Yii::app()->db->createCommand($sql)->queryScalar();
 
-		$sql = $sql1.$clause." GROUP BY b.firm_id ".$order;
+		$sql = $sql1.$clause." GROUP BY g.id,g.firm_name ".$order;
 		$sql = $this->sqlWithPageCriteria($sql, $this->pageNum);
 		$records = Yii::app()->db->createCommand($sql)->queryAll();
 

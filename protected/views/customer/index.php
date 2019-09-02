@@ -9,10 +9,30 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
     'layout'=>TbHtml::FORM_LAYOUT_INLINE,
 )); ?>
 <style>
-    .table-responsive>div:last-child{overflow-x: auto;width: 100%;}
-    #tblData{table-layout:fixed;}
+    .update-row{position: relative}
+    .update-row>td{position: relative}
+
+    .table-responsive>div:last-child{position: relative;overflow-x: hidden;width: 100%;}
+    #tblData{table-layout:fixed;position: relative;left: 0px;top:0px;}
     #tblData thead>th{min-width: 30px;}
     #tblData td{word-break: break-all;}
+
+    .scroll_table{position: fixed;bottom: 0px;overflow: hidden;padding: 0px 30px;margin-left: -15px;z-index: 99}
+    .scroll_table>div{overflow-x: auto;overflow-y: hidden;}
+    .scroll_table>div>div{width: 200%;height: 1px;}
+    @media (min-width: 768px){
+        .scroll_table{width: 750px;}
+        .modal-dialog {
+            width: 730px;
+        }
+        .modal-dialog>div{padding-right: 10px;}
+    }
+    @media (min-width: 992px){
+        .scroll_table{width: 970px;}
+    }
+    @media (min-width: 1200px){
+        .scroll_table{width: 1170px;}
+    }
 </style>
 
 <section class="content-header">
@@ -43,11 +63,11 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
         </div></div>
     <?php
     $search = array(
-        'firm_name',
+        //'firm_name',
         'client_code',
         'customer_name',
         'company_code',
-        'curr',
+        //'curr',
     );
     $search_add_html="";
     $modelName = get_class($model);
@@ -61,11 +81,18 @@ $this->pageTitle=Yii::app()->name . ' - Customer';
         'viewdtl'=>'//customer/_listdtl',
         'gridsize'=>'24',
         'height'=>'600',
-       'search_add_html'=>$search_add_html,
+       //'search_add_html'=>$search_add_html,
         'search'=>$search,
     ));
     ?>
 </section>
+<div class="scroll_table" id="scroll_table">
+    <div class="scroll_box" id="scroll_box">
+        <div class="scroll_span" id="scroll_span"></div>
+    </div>
+</div>
+<style>
+</style>
 <?php
 echo $form->hiddenField($model,'pageNum');
 echo $form->hiddenField($model,'totalRow');
@@ -77,6 +104,8 @@ echo $form->hiddenField($model,'orderType');
 <?php
 //$action_url = Yii::app()->createUrl('customer/updateSave');
 $js = "
+const CUSTOMER = ['payment','remark','acca_username','acca_phone','acca_discount','acca_lang','acca_fun','status_type','remarkHtml','acca_fax','refer_code','usual_date','head_worker','other_worker','advance_name','listing_name','listing_email','listing_fax','new_month','lbs_month','other_month'];
+
 $('.update-row a').on('click',function(event){
     event.stopPropagation();
 });
@@ -96,11 +125,21 @@ $('.update-row').on('click',function(){
         success: function(data){
             if(data.status==1){
                 $('#update_window .modal-content').html(data.html);
+                $('.usual_date').datepicker({autoclose: true, format: 'yyyy-mm-dd',language: 'zh_cn',endDate:new Date()});
             }else{
                 $('#update_window .modal-content').html('權限不足');
             }
         }
     });
+});
+
+$('body').delegate('input.refer_code','keyup',function(){
+    var refer_code=$(this).val();
+    if(refer_code == 6 || refer_code==8){
+        $('select.on_off').val(0);
+    }else{
+        $('select.on_off').val(1);
+    }
 });
 
 $('body').delegate('#update_window','submit',function(){
@@ -129,14 +168,14 @@ $('body').delegate('#update_window','submit',function(){
                 $('body').append(html);
             }
             if(data.status==1){
-                trObject.children('td.payment').text(d['updateWindow[payment]']);
-                trObject.children('td.acca_username').text(d['updateWindow[acca_username]']);
-                trObject.children('td.acca_phone').text(d['updateWindow[acca_phone]']);
-                trObject.children('td.acca_lang').text($('#updateWindow_acca_lang>option:selected').text());
-                trObject.children('td.acca_fun').text(d['updateWindow[acca_fun]']);
-                trObject.children('td.curr').text(d['updateWindow[curr]']);
+                $.each(CUSTOMER, function(i, n) {
+                    if(trObject.children('td.'+n).length>0){
+                        trObject.children('td.'+n).text(d['updateWindow['+n+']']);
+                    }
+                });
+                
                 trObject.children('td.status_type').text('".Yii::t("code","y")."');
-                trObject.children('td.remarkHtml').html(data.remarkHtml);
+                trObject.children('td.acca_lang').text($('#updateWindow_acca_lang>option:selected').text());
                 $('#update_window').modal('hide');
             }
             $('#hint_window .modal-content').html(data.html);
@@ -152,17 +191,51 @@ $('body').delegate('#btn-ago','click',function(){
     var fromAge = localStorage.fromAgo;
     if(fromAge != '' && fromAge != undefined){
         fromAge = JSON.parse(fromAge);
-        $('#updateWindow_payment').val(fromAge['updateWindow[payment]']);
-        $('#updateWindow_acca_username').val(fromAge['updateWindow[acca_username]']);
-        $('#updateWindow_acca_phone').val(fromAge['updateWindow[acca_phone]']);
-        $('#updateWindow_acca_lang').val(fromAge['updateWindow[acca_lang]']);
-        $('#updateWindow_acca_fun').val(fromAge['updateWindow[acca_fun]']);
-        $('#updateWindow_curr').val(fromAge['updateWindow[curr]']);
-        $('#updateWindow_acca_discount').val(fromAge['updateWindow[acca_discount]']);
-        $('#updateWindow_remark').val(fromAge['updateWindow[remark]']);
+        $.each(CUSTOMER, function(i, n) {
+            if($('#updateWindow_'+n).length>0){
+                $('#updateWindow_'+n).val(fromAge['updateWindow['+n+']']);
+            }
+        });
     }
 });
 
+$('.changeTableTop').on('click',function(){
+    var myOpen = $(this).data('oc');
+    var firm_id = $(this).data('firm');
+    console.log(myOpen);
+    console.log(firm_id);
+    if(myOpen == 'close'){
+        $('th[data-firm=\"'+firm_id+'\"]').data('oc','open');
+        $('*[data-firm=\"'+firm_id+'\"]:not(.notSum)').show();
+    }else{
+        $('th[data-firm=\"'+firm_id+'\"]').data('oc','close');
+        $('*[data-firm=\"'+firm_id+'\"]:not(.notSum)').hide();
+    }
+});
+$(function(){
+    $('#scroll_span').width($('#tblData').width());
+    $(window).scroll(function(){
+        var top = $('#tblData').height()+$('#tblData').offset().top;
+        if(top<$(window).scrollTop()+$(window).height()){
+            $('#scroll_table').css({
+                'position':'absolute',
+                'top':top+'px',
+                'bottom':'auto'
+            });
+        }else{
+            $('#scroll_table').css({
+                'position':'fixed',
+                'top':'auto',
+                'bottom':'0px'
+            });
+        }
+    });
+    $('#scroll_box').scroll(function(){
+        $('#tblData').parent('div').scrollLeft($(this).scrollLeft());
+        //var leftNum = (-1)*$(this).scrollLeft()-2;
+        //$('#tblData').css('left',leftNum+'px');
+    }).trigger('scroll');
+});
 ";
 Yii::app()->clientScript->registerScript('calcFunction',$js,CClientScript::POS_READY);
 $js = Script::genTableRowClick();

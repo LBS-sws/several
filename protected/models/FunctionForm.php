@@ -51,10 +51,10 @@ class FunctionForm extends CFormModel
             ),"id=:id",array(":id"=>$group_id));
     }
 
-    public function startProcess($firm_cus_id){
+    public function startProcess($customer_id){
         $html = "";
         $rows = Yii::app()->db->createCommand()->select("a.remark,a.lcd,b.disp_name")->from("sev_remark_list a")
-            ->leftJoin("sec_user b","b.username = a.lcu")->where("a.firm_cus_id=:firm_cus_id",array(":firm_cus_id"=>$firm_cus_id))->order("id desc")->queryAll();
+            ->leftJoin("sec_user b","b.username = a.lcu")->where("a.customer_id=:customer_id",array(":customer_id"=>$customer_id))->order("id desc")->queryAll();
         if($rows){
             foreach ($rows as $row){
                 $html.="<tr><td>".$row["lcd"]."</td>";
