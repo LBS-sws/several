@@ -101,9 +101,9 @@ return array(
     'clerk'=>'會計文員',
     'export Type'=>'導出類型',
 
-    'on off'=>'服務狀態',
-    'service on'=>'服務',
-    'service off'=>'關閉',
+    'on off'=>'客戶狀態',
+    'service on'=>'有效',
+    'service off'=>'無效',
     'pay type'=>'現金支付',
     'pay yes'=>'是',
     'pay no'=>'否',
@@ -128,5 +128,7 @@ return array(
     'Automatic Staff List'=>'自動指派員工列表',
     'automatic min'=>'最小值(包含等於)',
     'automatic max'=>'最大值(不包含等於)',
+
+    'Clear All'=>'清空',
 );
 ?>

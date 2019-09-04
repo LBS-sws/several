@@ -51,7 +51,7 @@ class SearchFirmList extends CListPageModel
 			$order .= " order by ".$this->orderField." ";
 			if ($this->orderType=='D') $order .= "desc ";
 		}else{
-            $order .= " order by g.z_index desc ";
+            $order .= " order by g.id desc ";
         }
 
 		$sql = $sql2.$clause;

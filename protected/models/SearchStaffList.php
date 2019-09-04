@@ -33,7 +33,7 @@ class SearchStaffList extends CListPageModel
             LEFT JOIN sev_staff g ON g.id = a.staff_id
             WHERE a.id>0 AND NOT ISNULL(a.staff_id) ";
         $sql2 = "SELECT COUNT(*) FROM 
-            (SELECT id,staff_id  FROM sev_customer t WHERE t.id >0 GROUP BY t.staff_id ) a
+            (SELECT t.staff_id  FROM sev_customer t WHERE t.id >0 GROUP BY t.staff_id ) a
             LEFT JOIN sev_staff g ON g.id = a.staff_id
             WHERE g.id>0 AND NOT ISNULL(a.staff_id) 
 			";
@@ -55,7 +55,7 @@ class SearchStaffList extends CListPageModel
 			$order .= " order by ".$this->orderField." ";
 			if ($this->orderType=='D') $order .= "desc ";
 		}else{
-            $order .= " order by g.lcd desc ";
+            $order .= " order by g.id desc ";
         }
 
 		$sql = $sql2.$clause;

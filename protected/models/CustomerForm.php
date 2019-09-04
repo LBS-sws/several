@@ -12,7 +12,7 @@ class CustomerForm extends CFormModel
 	public $client_code;
 	public $customer_code;
 	public $customer_name;
-	public $company_code;
+    public $company_code;
 	public $customer_id;
 	public $firm_id;
 	public $curr;
@@ -554,8 +554,7 @@ class CustomerForm extends CFormModel
         $firm_list = Yii::app()->user->firm_list();
         $list = $this->info_arr;
         $lcu = Yii::app()->user->id;
-//acca_fax,refer_code,usual_date,head_worker,other_worker,advance_name,listing_name,listing_email,listing_fax,new_month,lbs_month,other_month,
-        Yii::app()->db->createCommand()->update('sev_customer', array(
+        $arr = array(
             'acca_username'=>$this->acca_username,
             'acca_phone'=>$this->acca_phone,
             'acca_remark'=>$this->acca_remark,
@@ -573,15 +572,18 @@ class CustomerForm extends CFormModel
             'listing_email'=>$this->listing_email,
             'listing_fax'=>$this->listing_fax,
             'new_month'=>$this->new_month,
-            'lbs_month'=>$this->lbs_month,
-            'other_month'=>$this->other_month,
 
             'on_off'=>$this->on_off,
             'pay_type'=>$this->pay_type,
             'lud'=>date("Y-m-d H:i:s"),
             'status_type'=>'y',
             'payment'=>$this->payment
-        ), 'id=:id', array(':id'=>$this->customer_id));
+        );
+        if(empty($this->refer_code)&&$this->refer_code !== 0){
+            unset($arr["refer_code"]);
+        }
+//acca_fax,refer_code,usual_date,head_worker,other_worker,advance_name,listing_name,listing_email,listing_fax,new_month,lbs_month,other_month,
+        Yii::app()->db->createCommand()->update('sev_customer', $arr, 'id=:id', array(':id'=>$this->customer_id));
         foreach ($list as $key => $value){
             if(!in_array($key,$firm_list)){
                 return false;
@@ -621,7 +623,7 @@ class CustomerForm extends CFormModel
 
 	public function ajaxSaveData(){
         $lcu = Yii::app()->user->id;
-        Yii::app()->db->createCommand()->update('sev_customer', array(
+        $arr = array(
             'acca_username'=>$this->acca_username,
             'acca_phone'=>$this->acca_phone,
             'acca_remark'=>$this->acca_remark,
@@ -642,12 +644,14 @@ class CustomerForm extends CFormModel
             'listing_email'=>$this->listing_email,
             'listing_fax'=>$this->listing_fax,
             'new_month'=>$this->new_month,
-            'lbs_month'=>$this->lbs_month,
-            'other_month'=>$this->other_month,
 
             'status_type'=>'y',
             'lud'=>date("Y-m-d H:i:s")
-        ), 'id=:id', array(':id'=>$this->customer_id));
+        );
+        if(empty($this->refer_code)&&$this->refer_code !== 0){
+            unset($arr["refer_code"]);
+        }
+        Yii::app()->db->createCommand()->update('sev_customer', $arr, 'id=:id', array(':id'=>$this->customer_id));
 
         if (!empty($this->curr)){
             Yii::app()->db->createCommand()->update('sev_customer_firm', array(

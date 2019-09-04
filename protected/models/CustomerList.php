@@ -6,6 +6,29 @@ class CustomerList extends CListPageModel
 
     public $firmList=array();
     public $tableHeardList=array();
+
+    public $id;
+    public $client_code;
+    public $company_code;
+    public $customer_name;
+    public $acca_username;
+    public $acca_phone;
+    public $acca_fun;
+    public $acca_lang;
+    public $acca_fax;
+    public $refer_code;
+    public $head_worker;
+    public $other_worker;
+    public $advance_name;
+    public $listing_name;
+    public $listing_email;
+    public $listing_fax;
+    public $new_month;
+
+    public $salesman_id;
+    public $staff_id;
+    public $group_type;
+    public $on_off;
 	/**
 	 * Declares customized attribute labels.
 	 * If not declared here, an attribute would have a label that is
@@ -29,6 +52,7 @@ class CustomerList extends CListPageModel
             'acca_phone'=>Yii::t('several','accountant phone'),
             'acca_lang'=>Yii::t('several','accountant lang'),
             'acca_discount'=>Yii::t('several','discount'),
+            'on_off'=>Yii::t('several','on off'),
             'acca_remark'=>Yii::t('several','accountant remark'),
             'acca_fun'=>Yii::t('several','method'),
             'acca_fax'=>Yii::t('several','accountant fax'),
@@ -56,7 +80,11 @@ class CustomerList extends CListPageModel
     public function rules()
     {
         return array(
-            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchArrears','safe',),
+            array('attr, pageNum, noOfItem, totalRow, searchField, searchValue, orderField, orderType, searchArrears
+            ,id,client_code,customer_name,company_code,acca_username,acca_phone,acca_fax,acca_fun
+            ,listing_name,listing_email,listing_fax,new_month,refer_code,head_worker,other_worker,advance_name
+            ,salesman_id,staff_id,group_type,on_off
+            ','safe',),
         );
     }
 
@@ -100,6 +128,26 @@ class CustomerList extends CListPageModel
         return $sqlStr;
     }
 
+    protected function searchSql(){
+        $sql = "";
+        $arr = array("id","client_code","customer_name","company_code","acca_username","acca_phone","acca_fax","acca_fun","listing_name","listing_email","listing_fax","new_month","refer_code","head_worker","other_worker","advance_name","salesman_id","staff_id","group_type","on_off");
+        foreach ($arr as $value){
+            $svalue = str_replace("'","\'",$this->$value);
+            if($svalue!==""){
+                $sql.=" and ";
+                if(in_array($value,array("client_code","customer_name"))){
+                    $sql.="c.";
+                }elseif (in_array($value,array("company_code"))){
+                    $sql.="d.";
+                }else{
+                    $sql.="a.";
+                }
+                $sql.=$value." like '%".$svalue."%' ";
+            }
+        }
+        return $sql;
+    }
+
 	public function retrieveDataByPage($pageNum=1)
 	{
 		$suffix = Yii::app()->params['envSuffix'];
@@ -120,6 +168,7 @@ class CustomerList extends CListPageModel
 				where $firmSql 
 			";
 		$clause = "";
+        $clause.=$this->searchSql();
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
 			$svalue = str_replace("'","\'",$this->searchValue);
 			switch ($this->searchField) {
@@ -154,6 +203,7 @@ class CustomerList extends CListPageModel
 		if (count($records) > 0) {
 		    $StaffForm = new StaffForm();
 		    $langList = FunctionForm::getAllLang();
+		    $serverList = FunctionForm::getServiceList();
 			foreach ($records as $k=>$record) {
 			    //$color = floatval($record['amt'])>0?"text-danger":"text-primary";
 				$this->attr[] = array(
@@ -172,6 +222,7 @@ class CustomerList extends CListPageModel
 					'acca_username'=>$record['acca_username'],
 					'acca_phone'=>$record['acca_phone'],
 					'acca_fun'=>$record['acca_fun'],
+					'on_off'=>$serverList[$record['on_off']],
 					'acca_lang'=>$langList[$record['acca_lang']],
 
                     'acca_fax'=>$record['acca_fax'],

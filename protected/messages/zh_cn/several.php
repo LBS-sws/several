@@ -102,9 +102,9 @@ return array(
     'clerk'=>'会计文员',
     'export Type'=>'导出类型',
 
-    'on off'=>'服务状态',
-    'service on'=>'服务',
-    'service off'=>'关闭',
+    'on off'=>'客户状态',
+    'service on'=>'有效',
+    'service off'=>'无效',
     'pay type'=>'现金支付',
     'pay yes'=>'是',
     'pay no'=>'否',
@@ -129,5 +129,7 @@ return array(
     'Automatic Staff List'=>'自动指派员工列表',
     'automatic min'=>'最小值(包含等于)',
     'automatic max'=>'最大值(不包含等于)',
+
+    'Clear All'=>'清空',
 );
 ?>

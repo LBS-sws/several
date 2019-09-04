@@ -66,6 +66,11 @@
 			;
 		?>
 	</th>
+    <th width="110px">
+        <?php echo TbHtml::link($this->getLabelName('on_off').$this->drawOrderArrow('a.on_off'),'#',$this->createOrderLink('customer-list','a.on_off'))
+        ;
+        ?>
+    </th>
 	<th width="110px">
 		<?php echo TbHtml::link($this->getLabelName('acca_username').$this->drawOrderArrow('a.acca_username'),'#',$this->createOrderLink('customer-list','a.acca_username'))
 			;

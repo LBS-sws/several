@@ -32,9 +32,9 @@ class SearchGroupList extends CListPageModel
             WHERE a.id>0 AND NOT ISNULL(a.group_id) 
 			";
         $sql2 = "SELECT COUNT(*) FROM 
-            (SELECT id,group_id  FROM sev_customer t WHERE t.id>0 GROUP BY t.group_id ) a
+            (SELECT t.group_id  FROM sev_customer t WHERE t.id>0 GROUP BY t.group_id ) a
             LEFT JOIN sev_group g ON g.id = a.group_id
-            WHERE a.id>0 AND NOT ISNULL(a.group_id) 
+            WHERE NOT ISNULL(a.group_id) 
 			";
 		$clause = "";
 		if (!empty($this->searchField) && !empty($this->searchValue)) {
@@ -51,7 +51,7 @@ class SearchGroupList extends CListPageModel
 			$order .= " order by ".$this->orderField." ";
 			if ($this->orderType=='D') $order .= "desc ";
 		}else{
-            $order .= " order by a.lcd desc ";
+            $order .= " order by g.id desc ";
         }
 
 		$sql = $sql2.$clause;

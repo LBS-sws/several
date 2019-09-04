@@ -60,8 +60,20 @@ class MyExcelTwo {
         $this->objActSheet->getStyle('A'.$this->row)->getFont()->getColor()->setARGB(PHPExcel_Style_Color::COLOR_RED);
         $i = 1;
         foreach ($heardArr as $item){
-            $this->objActSheet->setCellValue($this->listArr[$i].$this->row,$item);
+            $str = $this->getStrToNum($i);
+            $this->objActSheet->setCellValue($str.$this->row,$item);
             $i++;
+        }
+    }
+
+    protected function getStrToNum($num){
+        $arr = $this->listArr;
+        if(count($arr)<=$num){
+            $i = intval($num/count($arr))-1;
+            $j = $num%count($arr);
+            return $arr[$i].$arr[$j];
+        }else{
+            return $arr[$num];
         }
     }
 
@@ -90,7 +102,8 @@ class MyExcelTwo {
                 $i++;
                 $row = $bodyArr[$list["key"]];
                 foreach ($row as $item){
-                    $this->objActSheet->setCellValue($this->listArr[$i].$this->row,$item);
+                    $str = $this->getStrToNum($i);
+                    $this->objActSheet->setCellValue($str.$this->row,$item);
                     $i++;
                 }
             }

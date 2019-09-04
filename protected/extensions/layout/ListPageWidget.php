@@ -6,6 +6,7 @@ class ListPageWidget extends CWidget
 	public $gridsize;
 	public $viewhdr;
 	public $viewdtl;
+    public $viewSearch='';
 	public $height='100';
 	public $search=array();
 	public $hasNavBar = true;
@@ -28,14 +29,21 @@ class ListPageWidget extends CWidget
 			if ($this->hasNavBar) {
 				$layout .= $this->navBar();
 			}
-			if ($this->hasSearchBar) {
-				$layout .= '<span class="pull-right">';
-				$layout .= $this->searchBar();
-				$layout .= '</span>';
-                if(!empty($this->search_add_html)){
-                    $layout.="<span class='pull-right' style='margin-right: 15px;'>".$this->search_add_html."</span>";
+			if(empty($this->viewSearch)){
+                if ($this->hasSearchBar) {
+                    $layout .= '<span class="pull-right">';
+                    $layout .= $this->searchBar();
+                    $layout .= '</span>';
+                    if(!empty($this->search_add_html)){
+                        $layout.="<span class='pull-right' style='margin-right: 15px;'>".$this->search_add_html."</span>";
+                    }
                 }
-			}
+            }else{
+                $layout .= '<div class="col-sm-12" id="search_new_div">';
+                $layout .= $this->render($this->viewSearch, $this->model, true);
+                $layout .= $this->searchBarTwo();
+                $layout .= '</div>';
+            }
 		$layout .= '</div>';
 		}
 		$layout .= '<div><table id="tblData" class="table table-hover">';
@@ -149,6 +157,16 @@ class ListPageWidget extends CWidget
 						'append'=>TbHtml::button('<span class="fa fa-search"></span> '.Yii::t('misc','Search'), array('submit'=>Yii::app()->createUrl($link,$param),)),
 				));
 		return $layout;
+	}
+
+	protected function searchBarTwo()
+	{
+		$link = '/'.$this->controller->uniqueId.'/'.$this->controller->action->id;
+		$param = array('pageNum'=>1);
+		if (!empty($this->searchlinkparam)) $param = array_merge($param, $this->searchlinkparam);
+		$clear = TbHtml::button(Yii::t('several','Clear All'), array("class"=>"pull-left",'id'=>'clean_all'));
+		$layout = TbHtml::button('<span class="fa fa-search"></span> '.Yii::t('misc','Search'), array('submit'=>Yii::app()->createUrl($link,$param),"class"=>"pull-right"));
+		return "<div class='form-group' style='padding-right: 15px;'>".$clear.$layout."</div>";
 	}
 	
 	protected function pageBar()

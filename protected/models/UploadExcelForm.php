@@ -38,6 +38,10 @@ class UploadExcelForm extends CFormModel
 	protected $staffOnlyList;
 	protected $command;
 
+	protected $lbsMonthArr=array();//總公司有欠款的月份
+	protected $othMonthArr=array();//细公司有欠款的月份
+	protected $_firmList=array();//lbs公司信息
+
 	public function init()
     {
         $this->command = Yii::app()->db->createCommand();
@@ -78,9 +82,10 @@ class UploadExcelForm extends CFormModel
         $id = $this->firm_id;
         if(!empty($id)){
             $this->command->reset();
-            $rows = $this->command->select("firm_name")->from("sev_firm")
+            $rows = $this->command->select("*")->from("sev_firm")
                 ->where('id=:id',array(':id'=>$id))->queryRow();
             if($rows){
+                $this->_firmList = $rows;
                 $this->firm_name_us = $rows["firm_name"];
             }else{
                 $message = Yii::t('several','Clients firm'). Yii::t('several',' does not exist');
@@ -119,6 +124,8 @@ class UploadExcelForm extends CFormModel
                 "lcu"=>$this->lcu,
                 "lcd"=>date("Y-m-d H:i:s"),
             );
+            $this->lbsMonthArr=array();
+            $this->othMonthArr=array();
 
             foreach ($list as $key=>$value){
                 $headStr = $arr["listHeader"][$key];
@@ -193,6 +200,8 @@ class UploadExcelForm extends CFormModel
     protected function insertCustormer(){
         $onlyArr = $this->onlyArr;
         $onlyArr["group_type"]=$this->group_type;
+        $onlyArr["lbs_month"]=count($this->lbsMonthArr);
+        $onlyArr["other_month"]=count($this->othMonthArr);
         $this->autoOnlyArr($onlyArr);
         $onlyArr["lud"]=$onlyArr["lcd"];
         $this->command->reset();
@@ -333,7 +342,7 @@ class UploadExcelForm extends CFormModel
                     return false;
                 }
                 if(key_exists("fun",$list)){ //有函數驗證
-                    $fun =  call_user_func(array("UploadExcelForm",$list["fun"]),$value);
+                    $fun =  call_user_func(array($this,$list["fun"]),$value);
                     if($fun["status"] ==  0){
                         array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$fun["error"]));
                         return false;
@@ -350,7 +359,7 @@ class UploadExcelForm extends CFormModel
                     }
                 }
 
-                if(!empty($value)){
+                if(!empty($value)||$value===0){
                     $this->onlyArr[$list["sqlName"]] = $value;
                 }
                 return true;
@@ -371,6 +380,13 @@ class UploadExcelForm extends CFormModel
                     return false;
                 }*/
                 //$this->amtSum+=floatval($value);
+                if($value>0){
+                    if($this->_firmList["firm_type"]==1){
+                        $this->lbsMonthArr[$monthKey] = $value;
+                    }else{
+                        $this->othMonthArr[$monthKey] = $value;
+                    }
+                }
                 $this->only_list["amtSum"]+=floatval($value);
                 $this->only_list["list"][$monthKey]=array(
                     "amt_gt"=>$amt_gt,
@@ -399,7 +415,7 @@ class UploadExcelForm extends CFormModel
                     return false;
                 }
                 if(key_exists("fun",$list)){ //有函數驗證
-                    $fun =  call_user_func(array("UploadExcelForm",$list["fun"]),$value);
+                    $fun =  call_user_func(array($this,$list["fun"]),$value);
                     if($fun["status"] ==  0){
                         array_push($this->error_list,$fun["error"]);
                         return false;
@@ -412,7 +428,7 @@ class UploadExcelForm extends CFormModel
                     $n = intval(($value - 25569) * 3600 * 24);     //转换成1970年以来的秒数
                     $value = gmdate('Y-m-d',$n);
                 }
-                if(!empty($value)){
+                if(!empty($value)||$value ===0){
                     $this->onlyArr[$list["sqlName"]] = $value;
                 }
                 return true;
@@ -544,6 +560,32 @@ class UploadExcelForm extends CFormModel
         }
     }
 
+    public function validateReferCode($value){
+        if(empty($value)){
+            return array("status"=>1,"value"=>"");
+        }
+        if($value == 6 || $value == 8){
+            $this->onlyArr["on_off"] = 0;
+        }
+        return array("status"=>1,"value"=>$value);
+    }
+
+    public function validateLang($value){
+        if(empty($value)){
+            return array("status"=>1,"value"=>"");
+        }
+        if(in_array($value,array("中文簡體","中文简体","中文"))){
+            $value = "zh_cn";
+        }elseif (in_array($value,array("中文繁體","中文繁体"))){
+            $value = "zh_tw";
+        }elseif ($value == "英文"){
+            $value = "en_us";
+        }else{
+            $value = "";
+        }
+        return array("status"=>1,"value"=>$value);
+    }
+
     private function getList(){
         return array(
             array("name"=>"客戶編號","sqlName"=>"client_code","empty"=>true,"fun"=>"validateCusCode"),
@@ -554,6 +596,19 @@ class UploadExcelForm extends CFormModel
             array("name"=>"付款期限","sqlName"=>"payment","empty"=>false),
             //array("name"=>"貨幣","sqlName"=>"curr","empty"=>true),
             //array("name"=>"剩餘數額","sqlName"=>"amt","empty"=>false),
+            array("name"=>"聯絡人姓名","sqlName"=>"acca_username","empty"=>false),
+            array("name"=>"聯絡人電話","sqlName"=>"acca_phone","empty"=>false),
+            array("name"=>"找數方法","sqlName"=>"acca_fun","empty"=>false),
+            array("name"=>"聯絡人語言","sqlName"=>"acca_lang","empty"=>false,"fun"=>"validateLang"),
+            array("name"=>"聯絡人傳真","sqlName"=>"acca_fax","empty"=>false),
+            array("name"=>"參考編號","sqlName"=>"refer_code","empty"=>false,"fun"=>"validateReferCode"),
+            array("name"=>"交予同事","sqlName"=>"head_worker","empty"=>false),
+            array("name"=>"其它跟進同事","sqlName"=>"other_worker","empty"=>false),
+            array("name"=>"預付客戶","sqlName"=>"advance_name","empty"=>false),
+            array("name"=>"月結單做法","sqlName"=>"listing_name","empty"=>false),
+            array("name"=>"月結單電郵","sqlName"=>"listing_email","empty"=>false),
+            array("name"=>"月結單傳真","sqlName"=>"listing_fax","empty"=>false),
+            array("name"=>"客戶新增月份","sqlName"=>"new_month","empty"=>false),
         );
     }
 

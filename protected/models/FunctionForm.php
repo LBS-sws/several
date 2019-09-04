@@ -79,12 +79,20 @@ class FunctionForm extends CFormModel
     }
 
     //獲取服務狀態列表
-    public function getServiceList(){
-        return array(
-            //""=>"",
-            0=>Yii::t("several","service off"),
-            1=>Yii::t("several","service on"),
-        );
+    public function getServiceList($bool = false){
+        if($bool){
+            $arr = array(
+                ""=>"",
+                0=>Yii::t("several","service off"),
+                1=>Yii::t("several","service on"),
+            );
+        }else{
+            $arr = array(
+                0=>Yii::t("several","service off"),
+                1=>Yii::t("several","service on"),
+            );
+        }
+        return $arr;
     }
 
     //獲取支付类型列表
