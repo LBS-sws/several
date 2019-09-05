@@ -232,23 +232,16 @@ class CustomerController extends Controller
     }
 
     public function actionTest2(){
-/*        $model = new FunctionForm();
-        $model->refreshGroupAll();
-        var_dump("end");
-        Yii::app()->end();*/
-var_dump("start");
-        //FunctionForm::refreshGroupAll();//刷新集團編號的次數及銷售員
-
-
-        $time = intval(date("His"));
-        var_dump($time);
-        $sql = "update sev_customer set status_type='n' where lud=lcd";//未更新
-        Yii::app()->db->createCommand($sql)->execute();
-        $sql = "update sev_customer set status_type='y' where time_to_sec(timediff(lud,lcd)) between 1 AND 2592000";//30天以內有更新
-        Yii::app()->db->createCommand($sql)->execute();
-        $sql = "update sev_customer set status_type='x' where time_to_sec(timediff(lud,lcd))>2592000";//30天以外未更新
-        Yii::app()->db->createCommand($sql)->execute();
-        die();
+        $url = "upload/excel/HK/20190905091957.xlsx";
+        $loadExcel = new LoadExcel($url,false);
+        $header = $loadExcel->getListHeader();
+        foreach ($header as $list){
+            $arr = explode("\n",$list);
+            if(count($arr)==2){
+                var_dump($arr);
+            }
+        }
+        //var_dump($header);
     }
 
     public function actionUpdate(){

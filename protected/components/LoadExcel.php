@@ -35,10 +35,10 @@ class LoadExcel {
         for($currentColumn= 0;$currentColumn<= $allColumn; $currentColumn++){
             $val = $currentSheet->getCellByColumnAndRow($currentColumn,1)->getValue();/**ord()将字符转为十进制数*/
             $val = trim($val);
-            if (strpos($val,' ')!==false){
+/*            if (strpos($val,' ')!==false){
                 $strAll = explode(" ",$val);
                 $val = current($strAll);
-            }
+            }*/
             array_push($listHeader,$val);
         }
         if($bool){

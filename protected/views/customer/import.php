@@ -41,15 +41,6 @@ $this->pageTitle=Yii::app()->name . ' - Customer Import';
 		<div class="box-body">
 
             <div class="form-group">
-                <?php echo $form->labelEx($model,'firm_id',array('class'=>"col-sm-2 control-label")); ?>
-                <div class="col-sm-3">
-                    <?php echo $form->dropDownList($model, 'firm_id',CustomerForm::getFirmList(),
-                        array('readonly'=>(false),'class'=>'form-control')
-                    ); ?>
-                </div>
-            </div>
-
-            <div class="form-group">
                 <?php echo $form->labelEx($model,'file',array('class'=>"col-sm-2 control-label")); ?>
                 <div class="col-sm-5">
                     <?php echo $form->fileField($model, 'file',
@@ -68,7 +59,7 @@ $this->pageTitle=Yii::app()->name . ' - Customer Import';
             </div>
             <div class="form-group">
                 <div class="col-sm-5 col-sm-offset-2">
-                    <p class="form-control-static text-danger">如果导入失败会下载一个excel，下载后请手动刷新页面</p>
+                    <p class="form-control-static text-danger">文件上传后，请去报表管理员查看导入状态</p>
                 </div>
             </div>
 		</div>

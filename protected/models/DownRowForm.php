@@ -219,6 +219,8 @@ class DownRowForm {
         if($rows){
             $num = $this->row;
             foreach ($rows as $row){
+                $this->lbsMonth =0;
+                $this->otherMonth =0;
                 $this->setRowContent("A".$num,$row["client_code"]);//客戶編號
                 $this->setRowContent("B".$num,$row["customer_name"]);//客戶名稱
                 $this->setRowContent("C".$num,$row["company_code"]);//集團編號
@@ -299,7 +301,7 @@ class DownRowForm {
                         }
                         $sum+=floatval($num);
                     }
-                    if($num>0){
+                    if($num>0&&$key != "branch"){
                         if($item["type"]==1){
                             $this->lbsMonth++;
                         }else{

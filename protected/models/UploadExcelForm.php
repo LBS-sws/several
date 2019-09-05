@@ -12,8 +12,9 @@ class UploadExcelForm extends CFormModel
 	public $file_name;
 	public $file_type;
 	public $file_url;
-	public $firm_id;
+	public $firm_id_arr;
 	public $firm_name_us;
+	public $firm_name_us_arr;
 	public $onlyArr;//需要導入的數據
 	public $onlyStaff;//需要導入的員工數據
 	public $onlyArrInfo;
@@ -70,26 +71,34 @@ class UploadExcelForm extends CFormModel
 	public function rules()
 	{
 		return array(
-            array('file,firm_id','safe'),
-            array('firm_id','required'),
+            array('file,cover_bool','safe'),
             array('cover_bool','required'),
-            array('firm_id','validateFirmId'),
             array('file', 'file', 'types'=>'xlsx,xls', 'allowEmpty'=>false, 'maxFiles'=>1),
 		);
 	}
 
-    public function validateFirmId($attribute, $params){
-        $id = $this->firm_id;
-        if(!empty($id)){
-            $this->command->reset();
-            $rows = $this->command->select("*")->from("sev_firm")
-                ->where('id=:id',array(':id'=>$id))->queryRow();
-            if($rows){
-                $this->_firmList = $rows;
-                $this->firm_name_us = $rows["firm_name"];
-            }else{
-                $message = Yii::t('several','Clients firm'). Yii::t('several',' does not exist');
-                $this->addError($attribute,$message);
+    private function getFirmListToName($firm_name){
+        $this->command->reset();
+        $rows = $this->command->select("*")->from("sev_firm")
+            ->where('firm_name=:firm_name',array(':firm_name'=>$firm_name))->queryRow();
+        if($rows){
+            $this->firm_id_arr[] = $rows["id"];
+            $this->firm_name_us_arr[] = $rows["firm_name"];
+            $this->_firmList[$firm_name] = $rows;
+            return $rows;
+        }else{
+            return false;
+        }
+    }
+
+    private function resetFirmList($headList){
+        foreach ($headList as $str){
+            $arr = explode("\n",$str);
+            $arr = count($arr)==2?$arr:explode(" ",$str);
+            if(count($arr)==2){
+                if(!key_exists($arr[0],$this->_firmList)){
+                    $this->getFirmListToName($arr[0]);
+                }
             }
         }
     }
@@ -111,15 +120,13 @@ class UploadExcelForm extends CFormModel
         unset($validateArr);
 
         $this->resetStaffOnlyList();//添加必須存在的員工
+        $this->resetFirmList($arr["listHeader"]);//跟进excel页头重置lbs公司
         foreach ($arr["listBody"] as $list_key=> $list){
             $continue = true;
             $this->excel_list_key = $list_key;//
             $this->start_title = current($list);//每行的第一個文本
             $this->amtSum=0; //初始化每條數據
-            $this->only_list=array(
-                'amtSum'=>0,
-                'list'=>array()
-            ); //初始化每條數據
+            $this->only_list=array(); //初始化每條數據
             $this->onlyArr=array( //初始化每條數據
                 "lcu"=>$this->lcu,
                 "lcd"=>date("Y-m-d H:i:s"),
@@ -138,17 +145,20 @@ class UploadExcelForm extends CFormModel
             if($continue){
                 //導入數據
                 $arrInfoList = $this->only_list;
-                $this->amtSum = $arrInfoList["amtSum"];
-                $insetId = $this->insertCustormer();
-                if(!empty($arrInfoList["list"])){
-                    foreach ($arrInfoList["list"] as &$item){
-                        $item["firm_cus_id"]=$insetId;
-                        $item["customer_id"]=$this->customer_id;
-                        $this->command->reset();
-                        $this->command->insert("sev_customer_info", $item);
+                //$this->amtSum = $arrInfoList["amtSum"];
+                $this->insertCustomer();//導入客戶資料
+                foreach ($arrInfoList as $firm_id => $list){
+                    $amtSum = isset($list["amtSum"])?$list["amtSum"]:0;
+                    $insetId = $this->insertCustomerInfo($firm_id,$amtSum);//導入客戶與LBS的關係表
+                    if(!empty($list["list"])){
+                        foreach ($list["list"] as &$item){
+                            $item["firm_cus_id"]=$insetId;
+                            $item["customer_id"]=$this->customer_id;
+                            $this->command->reset();
+                            $this->command->insert("sev_customer_info", $item);//導入欠款信息
+                        }
                     }
                 }
-                unset($insetId);
             }else{
                 $errNum++;
             }
@@ -168,11 +178,15 @@ class UploadExcelForm extends CFormModel
     //刪除導入以外的客戶追數
     protected function deleteCompany(){
         if (!empty($this->company_id_list)){
+            $firmSql = "";
+            if(!empty($this->firm_id_arr)){
+                $firmSql = " and a.firm_id in (".implode(",",$this->firm_id_arr).")";
+            }
             $companyList = implode(",",$this->company_id_list);
             $sql = "DELETE a,e FROM sev_customer_firm a
             LEFT JOIN sev_customer b ON a.customer_id = b.id
             LEFT JOIN sev_customer_info e ON a.id = e.firm_cus_id
-            WHERE b.company_id NOT IN ($companyList) AND a.firm_id = ".$this->firm_id;
+            WHERE b.company_id NOT IN ($companyList) ".$firmSql;
             Yii::app()->db->createCommand($sql)->execute();//刪除追數信息
 
             $sql = "DELETE FROM sev_customer WHERE id NOT IN (
@@ -197,7 +211,7 @@ class UploadExcelForm extends CFormModel
         //die();
     }
 
-    protected function insertCustormer(){
+    protected function insertCustomer(){
         $onlyArr = $this->onlyArr;
         $onlyArr["group_type"]=$this->group_type;
         $onlyArr["lbs_month"]=count($this->lbsMonthArr);
@@ -205,56 +219,61 @@ class UploadExcelForm extends CFormModel
         $this->autoOnlyArr($onlyArr);
         $onlyArr["lud"]=$onlyArr["lcd"];
         $this->command->reset();
-        $row = $this->command->select("id,firm_name_id")->from("sev_customer")
+        $row = $this->command->select("id,firm_name_id,lbs_month,other_month,firm_name_us")->from("sev_customer")
             ->where('company_id=:company_id',array(':company_id'=>$onlyArr["company_id"]))->queryRow();
         if($row){//如果已存在客戶關係
-            $this->command->reset();
-            $this->command->update("sev_customer", $onlyArr,"id=:id",array(":id"=>$row["id"]));
-            $this->customer_id = $row["id"];
-            $this->command->reset();
-            $arr = $this->command->select("id")->from("sev_customer_firm")
-                ->where('customer_id=:customer_id AND firm_id=:firm_id',array(':customer_id'=>$row["id"],':firm_id'=>$this->firm_id))->queryRow();
-            if($arr){//如果已存在客戶追數信息
+            $updateArr = array(
+                "lbs_month"=>$onlyArr["lbs_month"]+$row["lbs_month"],
+                "other_month"=>$onlyArr["other_month"]+$row["other_month"],
+                "firm_name_id"=>implode(",",array_unique(array_merge(explode(",",$row["firm_name_id"]),$this->firm_id_arr))),
+                "firm_name_us"=>implode(",",array_unique(array_merge(explode(",",$row["firm_name_us"]),$this->firm_name_us_arr))),
+            );
+            if($this->cover_bool == 1){
                 $this->command->reset();
-                $this->command->delete("sev_customer_info","firm_cus_id=:id",array(":id"=>$arr["id"]));
-                $this->command->reset();
-                $this->command->update("sev_customer_firm", array(
-                    "amt"=>$this->amtSum,
-                ),"id=:id",array(":id"=>$arr["id"]));
-                unset($onlyArr);
-                return $arr["id"];
+                $this->command->update("sev_customer", $updateArr,"id=:id",array(":id"=>$row["id"]));
             }else{
-                $sql = "update sev_customer set firm_name_id=CONCAT(firm_name_id,',".$this->firm_id."'),firm_name_us=CONCAT(firm_name_us,',".$this->firm_name_us."'),lud=lcd where id=".$row["id"];
-                Yii::app()->db->createCommand($sql)->execute();
+                $onlyArr["lbs_month"] = $updateArr["lbs_month"];
+                $onlyArr["other_month"] = $updateArr["other_month"];
+                $onlyArr["firm_name_id"] = $updateArr["firm_name_id"];
+                $onlyArr["firm_name_us"] = $updateArr["firm_name_us"];
                 $this->command->reset();
-                $this->command->insert("sev_customer_firm", array(
-                    "customer_id"=>$row["id"],
-                    "firm_id"=>$this->firm_id,
-                    "amt"=>$this->amtSum,
-                ));
-                unset($onlyArr);
-                return Yii::app()->db->getLastInsertID();
+                $this->command->update("sev_customer", $onlyArr,"id=:id",array(":id"=>$row["id"]));
             }
+            $this->customer_id = $row["id"];
         }else{
-
             if($this->add_company_bool){
                 $this->command->reset();
                 $this->command->update("sev_company", array(
                     "group_id"=>$onlyArr["group_id"]
                 ),"id=:id",array(":id"=>$onlyArr["company_id"]));
             }
-            $onlyArr["firm_name_id"]=$this->firm_id;
-            $onlyArr["firm_name_us"]=$this->firm_name_us;
+            $onlyArr["firm_name_id"]=implode(",",$this->firm_id_arr);
+            $onlyArr["firm_name_us"]=implode(",",$this->firm_name_us_arr);
             $this->command->reset();
             $this->command->insert("sev_customer", $onlyArr);
             $this->customer_id = Yii::app()->db->getLastInsertID();
+        }
+    }
+
+    private function insertCustomerInfo($firm_id,$amtSum){
+        $this->command->reset();
+        $arr = $this->command->select("id")->from("sev_customer_firm")
+            ->where('customer_id=:customer_id AND firm_id=:firm_id',array(':customer_id'=>$this->customer_id,':firm_id'=>$firm_id))->queryRow();
+        if($arr){
+            $this->command->reset();
+            $this->command->delete("sev_customer_info","firm_cus_id=:id",array(":id"=>$arr["id"]));
+            $this->command->reset();
+            $this->command->update("sev_customer_firm", array(
+                "amt"=>$amtSum,
+            ),"id=:id",array(":id"=>$arr["id"]));
+            return $arr["id"];
+        }else{
             $this->command->reset();
             $this->command->insert("sev_customer_firm", array(
                 "customer_id"=>$this->customer_id,
-                "firm_id"=>$this->firm_id,
-                "amt"=>$this->amtSum,
+                "firm_id"=>$firm_id,
+                "amt"=>$amtSum,
             ));
-            unset($onlyArr);
             return Yii::app()->db->getLastInsertID();
         }
     }
@@ -331,6 +350,48 @@ class UploadExcelForm extends CFormModel
         return $monthKey;
     }
 
+    private function judgeMonth($headStr,$value,$firmList){
+        $amt_gt = 1;
+        if(strpos($headStr,'月或之前')!==false){
+            $amt_gt = 0;
+            $headStr = current(explode("或之",$headStr));
+        }
+        $monthKey = $this->getMonthKeyToStr($headStr);
+        if ($monthKey !== false){
+            if(is_numeric($value)){
+                /*                if(floatval($value)<0){
+                                    array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."必須大於零（".$headStr."）"));
+                                    return false;
+                                }*/
+                //$this->amtSum+=floatval($value);
+                if($value>0){
+                    if($firmList["firm_type"]==1){
+                        $this->lbsMonthArr[$monthKey] = $value;
+                    }else{
+                        $this->othMonthArr[$monthKey] = $value;
+                    }
+                }
+                if(!isset($this->only_list[$firmList["id"]]["amtSum"])){
+                    $this->only_list[$firmList["id"]]["amtSum"] =0;
+                }
+                $this->only_list[$firmList["id"]]["amtSum"]+=floatval($value);
+                $this->only_list[$firmList["id"]]["list"][$monthKey]=array(
+                    "amt_gt"=>$amt_gt,
+                    "amt_name"=>$monthKey,
+                    "amt_num"=>$value,
+                    "lcu"=>$this->lcu,
+                );
+            }else{
+                array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."只能為數字（".$firmList["firm_name"]."  ".$headStr."）"));
+                return false;
+            }
+
+        }
+        unset($arrList);
+        unset($amt_gt);
+        return true;
+    }
+
     private function validateList($headStr,$value){
         $headList = $this->getList();
         //判斷是否為必須字段
@@ -366,42 +427,19 @@ class UploadExcelForm extends CFormModel
             }
         }
 
-        //判斷是否為時間
-        $amt_gt = 1;
-        if(strpos($headStr,'月或之前')!==false){
-            $amt_gt = 0;
-            $headStr = current(explode("或之",$headStr));
-        }
-        $monthKey = $this->getMonthKeyToStr($headStr);
-        if ($monthKey !== false){
-            if(is_numeric($value)){
-/*                if(floatval($value)<0){
-                    array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."必須大於零（".$headStr."）"));
-                    return false;
-                }*/
-                //$this->amtSum+=floatval($value);
-                if($value>0){
-                    if($this->_firmList["firm_type"]==1){
-                        $this->lbsMonthArr[$monthKey] = $value;
-                    }else{
-                        $this->othMonthArr[$monthKey] = $value;
-                    }
-                }
-                $this->only_list["amtSum"]+=floatval($value);
-                $this->only_list["list"][$monthKey]=array(
-                    "amt_gt"=>$amt_gt,
-                    "amt_name"=>$monthKey,
-                    "amt_num"=>$value,
-                    "lcu"=>$this->lcu,
-                );
+        //判斷是否為時間(包含lbs公司)
+        $arr = explode("\n",$headStr);
+        $arr = count($arr)==2?$arr:explode(" ",$headStr);
+        if(count($arr)==2){
+            if(key_exists($arr[0],$this->_firmList)){
+                $firmList = $this->_firmList[$arr[0]];
             }else{
-                array_push($this->error_list,array("key"=>$this->excel_list_key,"error"=>$value."只能為數字（".$headStr."）"));
-                return false;
+                $firmList = false;
             }
-
+            if($firmList){
+                return $this->judgeMonth($arr[1],$value,$firmList);
+            }
         }
-        unset($arrList);
-        unset($amt_gt);
         return true;
     }
 
@@ -502,11 +540,15 @@ class UploadExcelForm extends CFormModel
                 if($rows){
                     $this->addCompanyIdList($rows["id"]);//記錄excel里的公司id
                     if($this->cover_bool == 1){
+                        $firmSql = "";
+                        if(!empty($this->firm_id_arr)){
+                            $firmSql = " and a.firm_id in (".implode(",",$this->firm_id_arr).")";
+                        }
                         $this->command->reset();
                         $list = $this->command->select("b.id")->from("sev_customer_firm a")
                             ->leftJoin("sev_customer b","a.customer_id = b.id")
-                            ->where('b.company_id=:company_id and a.firm_id=:firm_id',
-                                array(':company_id'=>$rows["id"],':firm_id'=>$this->firm_id))->queryRow();
+                            ->where('b.company_id=:company_id'.$firmSql,
+                                array(':company_id'=>$rows["id"]))->queryRow();
                         if($list){
                             return array("status"=>0,"error"=>"該客戶在已存在，不可重複添加。重複ID：".$list["id"]);
                         }
@@ -694,7 +736,7 @@ class UploadExcelForm extends CFormModel
     }
 
     protected function saveSql(){
-        $list=array("firm_id","cover_bool");
+        $list=array("cover_bool");
         $postList = $_POST["UploadExcelForm"];
 
         $loadExcel = new LoadExcel($this->file_url,false);

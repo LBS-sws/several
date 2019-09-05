@@ -81,7 +81,6 @@ class TestCommand extends CConsoleCommand {
                 $model[$item["option_name"]] = $item["option_value"];
             }
         }
-        $model->validateFirmId(1,2);
         $loadExcel = new LoadExcel($row["file_url"]);
         $list = $loadExcel->getExcelList();
         unset($loadExcel);

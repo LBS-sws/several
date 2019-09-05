@@ -26,7 +26,7 @@
                     }
                     $sum+=floatval($num);
                 }
-                if($num>0){
+                if($num>0&&$key != "branch"){
                     if($item["type"]==1){
                         $lbsMonth++;
                     }else{
