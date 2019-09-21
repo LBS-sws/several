@@ -147,4 +147,24 @@
 			;
 		?>
 	</th>
+	<th width="110px">
+		<?php echo TbHtml::link($this->getLabelName('pay_type').$this->drawOrderArrow('a.pay_type'),'#',$this->createOrderLink('customer-list','a.pay_type'))
+			;
+		?>
+	</th>
+	<th width="110px">
+		<?php echo TbHtml::link($this->getLabelName('acca_discount').$this->drawOrderArrow('a.acca_discount'),'#',$this->createOrderLink('customer-list','a.acca_discount'))
+			;
+		?>
+	</th>
+	<th width="350px">
+		<?php echo TbHtml::link($this->getLabelName('remark').$this->drawOrderArrow('a.id'),'#',$this->createOrderLink('customer-list','a.id'))
+			;
+		?>
+	</th>
+	<th width="110px">
+		<?php echo TbHtml::link($this->getLabelName('luu').$this->drawOrderArrow('a.lud'),'#',$this->createOrderLink('customer-list','a.lud'))
+			;
+		?>
+	</th>
 </tr>

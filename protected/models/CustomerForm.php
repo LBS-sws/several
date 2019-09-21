@@ -616,7 +616,7 @@ class CustomerForm extends CFormModel
         //保存備註
         Yii::app()->db->createCommand()->insert("sev_remark_list", array(
             "customer_id"=>$this->id,
-            "remark"=>$this->remark,
+            "remark"=>htmlspecialchars($this->remark),
             "lcu"=>$lcu,
         ));
 	}
@@ -661,7 +661,7 @@ class CustomerForm extends CFormModel
         //保存備註
         Yii::app()->db->createCommand()->insert("sev_remark_list", array(
             "customer_id"=>$this->id,
-            "remark"=>$this->remark,
+            "remark"=>htmlspecialchars($this->remark),
             "lcu"=>$lcu,
         ));
         $html = '<div class="modal-header"><button class="close" data-dismiss="modal" type="button">×</button><h4 class="modal-title">'.Yii::t('dialog','Information').'</h4></div>';

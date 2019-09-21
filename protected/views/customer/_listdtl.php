@@ -65,4 +65,9 @@
     <td class="listing_fax"><?php echo $this->record['listing_fax']; ?></td>
     <td class="new_month"><?php echo $this->record['new_month']; ?></td>
 
+    <td class="pay_type"><?php echo $this->record['pay_type']; ?></td>
+    <td class="acca_discount"><?php echo $this->record['acca_discount']; ?></td>
+    <td class="remark"><?php echo $this->record['remark']; ?></td>
+    <td class="luu"><?php echo $this->record['luu']; ?></td>
+
 </tr>

@@ -75,6 +75,10 @@ class CustomerList extends CListPageModel
 
             'lbs_month'=>"总公司<br>".Yii::t('several','month num'),
             'other_month'=>Yii::t('several','branch')."<br>".Yii::t('several','month num'),
+//group_type  on_off head_worker acca_discount pay_type luu
+            'pay_type'=>Yii::t('several','pay type'),
+            'luu'=>Yii::t('several','date updated'),
+            'remark'=>Yii::t('several','Update Remark'),
 		);
 	}
     public function rules()
@@ -123,7 +127,7 @@ class CustomerList extends CListPageModel
         }
 
         if(!empty($sqlStr)){
-            $sqlStr="(".$sqlStr.")";
+            $sqlStr="((".$sqlStr.") or a.firm_name_id = '')";
         }
         return $sqlStr;
     }
@@ -204,6 +208,7 @@ class CustomerList extends CListPageModel
 		    $StaffForm = new StaffForm();
 		    $langList = FunctionForm::getAllLang();
 		    $serverList = FunctionForm::getServiceList();
+		    $payTypeList = FunctionForm::getPayList();
 			foreach ($records as $k=>$record) {
 			    //$color = floatval($record['amt'])>0?"text-danger":"text-primary";
 				$this->attr[] = array(
@@ -237,6 +242,12 @@ class CustomerList extends CListPageModel
                     'new_month'=>$record['new_month'],
                     'lbs_month'=>$record['lbs_month'],
                     'other_month'=>$record['other_month'],
+
+//group_type  on_off head_worker acca_discount pay_type luu
+                    'acca_discount'=>$record['acca_discount'],
+                    'pay_type'=>$payTypeList[$record['pay_type']],
+                    'luu'=>date("Y-m-d",strtotime($record['lud'])),
+                    'remark'=>$this->getRemarkHtml($record['id']),
 				);
 			}
 		}

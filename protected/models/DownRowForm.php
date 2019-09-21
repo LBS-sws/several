@@ -38,6 +38,13 @@ class DownRowForm {
             "listing_email"=>array("name"=>Yii::t("several","listing email"),"width"=>""),
             "listing_fax"=>array("name"=>Yii::t("several","listing fax"),"width"=>""),
             "new_month"=>array("name"=>Yii::t("several","new month"),"width"=>""),
+
+
+//group_type  on_off head_worker acca_discount pay_type luu
+            "on_off"=>array("name"=>Yii::t("several","on off"),"width"=>""),
+            "pay_type"=>array("name"=>Yii::t("several","pay type"),"width"=>""),
+            "acca_discount"=>array("name"=>Yii::t("several","discount"),"width"=>""),
+            "lud"=>array("name"=>Yii::t("several","date updated"),"width"=>""),
         );
     }
 
@@ -167,6 +174,11 @@ class DownRowForm {
             $str = $this->getStrToNum($endNum);
             $this->setRowContent($str.$row,$item["name"]);
         }
+        $endNum++;
+        $str = $this->getStrToNum($endNum);
+        $this->setRowContent($str.$row,Yii::t('several','Update Remark'));
+        $this->setWidthToArr($str,45);
+        //$this->objActSheet->getStyle($str.$row)->getAlignment()->setWrapText(true);
 
         $this->row = 6;
     }
@@ -239,11 +251,35 @@ class DownRowForm {
                     $this->setRowContent($str.$num,$value);//係公司欠款月數
                     $column++;
                 }
+                $str=$this->getStrToNum($column);
+                $this->setRowContent($str.$num,$this->getRemarkHtml($row["id"]));
+                $this->objActSheet->getStyle($str.$num)->getAlignment()->setWrapText(true);
 
 
                 $num++;
             }
         }
+    }
+
+    protected function getRemarkHtml($customer_id){
+        $html = "";
+        $rows = Yii::app()->db->createCommand()->select("a.remark,b.disp_name,a.lcd")->from("sev_remark_list a")
+            ->leftJoin("sec_user b","a.lcu = b.username")
+            ->where("a.customer_id=:customer_id",array(':customer_id'=>$customer_id))->order("a.lcd desc")->queryAll();
+
+        if($rows){
+            $num = 0;
+            $bool = count($rows)>1?true:false;
+            foreach ($rows as $row){
+                $num++;
+                if($num!==1){
+                    $html.="\r\n";
+                }
+                $serial = $bool?"($num)、":"";
+                $html.="$serial ".htmlspecialchars_decode($row["remark"])." - ".$row["disp_name"]." - ".$row["lcd"];
+            }
+        }
+        return $html;
     }
 
     protected function resetRow($key,&$row){
@@ -253,7 +289,15 @@ class DownRowForm {
             }
             if($key == "acca_lang"){
                 $langList = FunctionForm::getAllLang();
-                $row[$key]=$langList[$row['acca_lang']];
+                $row[$key]=isset($langList[$row['acca_lang']])?$langList[$row['acca_lang']]:"";
+            }
+            if($key == "pay_type"){
+                $payTypeList = FunctionForm::getPayList();
+                $row[$key]=isset($payTypeList[$row['pay_type']])?$payTypeList[$row['pay_type']]:"";
+            }
+            if($key == "on_off"){
+                $serverList = FunctionForm::getServiceList();
+                $row[$key]=isset($serverList[$row['on_off']])?$serverList[$row['on_off']]:"";
             }
             if($key == "group_type"){
                 $row['group_type']=empty($row['group_type'])?Yii::t("several","not group"):Yii::t("several","is group");

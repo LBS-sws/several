@@ -68,7 +68,7 @@ return array(
 
     'overwrite files'=>'是否覆盖',
 
-    'Update Remark'=>'修改说明',
+    'Update Remark'=>'跟进状况',
     'phone'=>'电话号码',
     'staff phone'=>'员工电话',
     'accountant username'=>'联络人姓名',
@@ -131,5 +131,8 @@ return array(
     'automatic max'=>'最大值(不包含等于)',
 
     'Clear All'=>'清空',
+
+    'date updated'=>'更新日期',
+    'terms payment'=>'付款方式',
 );
 ?>

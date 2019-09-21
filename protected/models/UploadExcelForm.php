@@ -12,9 +12,9 @@ class UploadExcelForm extends CFormModel
 	public $file_name;
 	public $file_type;
 	public $file_url;
-	public $firm_id_arr;
+	public $firm_id_arr=array();
 	public $firm_name_us;
-	public $firm_name_us_arr;
+	public $firm_name_us_arr=array();
 	public $onlyArr;//需要導入的數據
 	public $onlyStaff;//需要導入的員工數據
 	public $onlyArrInfo;
@@ -133,7 +133,6 @@ class UploadExcelForm extends CFormModel
             );
             $this->lbsMonthArr=array();
             $this->othMonthArr=array();
-
             foreach ($list as $key=>$value){
                 $headStr = $arr["listHeader"][$key];
                 if(!$this->validateList($headStr,$value)){
@@ -178,21 +177,20 @@ class UploadExcelForm extends CFormModel
     //刪除導入以外的客戶追數
     protected function deleteCompany(){
         if (!empty($this->company_id_list)){
-            $firmSql = "";
-            if(!empty($this->firm_id_arr)){
+            if(!empty($this->firm_id_arr)){//如果LBS公司為空，則不刪除
                 $firmSql = " and a.firm_id in (".implode(",",$this->firm_id_arr).")";
-            }
-            $companyList = implode(",",$this->company_id_list);
-            $sql = "DELETE a,e FROM sev_customer_firm a
+                $companyList = implode(",",$this->company_id_list);
+                $sql = "DELETE a,e FROM sev_customer_firm a
             LEFT JOIN sev_customer b ON a.customer_id = b.id
             LEFT JOIN sev_customer_info e ON a.id = e.firm_cus_id
             WHERE b.company_id NOT IN ($companyList) ".$firmSql;
-            Yii::app()->db->createCommand($sql)->execute();//刪除追數信息
+                Yii::app()->db->createCommand($sql)->execute();//刪除追數信息
 
-            $sql = "DELETE FROM sev_customer WHERE id NOT IN (
+                $sql = "DELETE FROM sev_customer WHERE id NOT IN (
             SELECT customer_id FROM sev_customer_firm GROUP BY customer_id
             )";//刪除沒有關聯的客戶
-            Yii::app()->db->createCommand($sql)->execute();
+                Yii::app()->db->createCommand($sql)->execute();
+            }
         }
     }
 

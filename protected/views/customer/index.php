@@ -109,7 +109,7 @@ echo $form->hiddenField($model,'orderType');
 <?php
 //$action_url = Yii::app()->createUrl('customer/updateSave');
 $js = "
-const CUSTOMER = ['payment','on_off','remark','acca_username','acca_phone','acca_discount','acca_lang','acca_fun','status_type','remarkHtml','acca_fax','refer_code','usual_date','head_worker','other_worker','advance_name','listing_name','listing_email','listing_fax','new_month','lbs_month','other_month'];
+const CUSTOMER = ['payment','acca_username','acca_phone','acca_discount','acca_lang','acca_fun','status_type','remarkHtml','acca_fax','refer_code','usual_date','head_worker','other_worker','advance_name','listing_name','listing_email','listing_fax','new_month','lbs_month','other_month'];
 
 $('.update-row a').on('click',function(event){
     event.stopPropagation();
@@ -178,10 +178,22 @@ $('body').delegate('#update_window','submit',function(){
                         trObject.children('td.'+n).text(d['updateWindow['+n+']']);
                     }
                 });
-                
+                var myDate = new Date;
+                var year = myDate.getFullYear(); //获取当前年
+                var mon = myDate.getMonth() + 1; //获取当前月
+                var day = myDate.getDate(); //获取当前日
+                if(mon<10){
+                    mon = '0'+mon;
+                }
+                if(day<10){
+                    day = '0'+day;
+                }
                 trObject.children('td.status_type').text('".Yii::t("code","y")."');
                 trObject.children('td.acca_lang').text($('#updateWindow_acca_lang>option:selected').text());
                 trObject.children('td.on_off').text($('#updateWindow_on_off>option:selected').text());
+                trObject.children('td.pay_type').text($('#updateWindow_pay_type>option:selected').text());
+                trObject.children('td.luu').text(year+'-'+mon+'-'+day);
+                trObject.children('td.remark').html(data.remarkHtml);
                 $('#update_window').modal('hide');
             }
             $('#hint_window .modal-content').html(data.html);
